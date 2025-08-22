@@ -20,13 +20,8 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => {
   const navigationItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'transactions', label: 'Transactions', icon: CreditCard },
-    { id: 'customers', label: 'Customers', icon: Users },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'inventory', label: 'Inventory', icon: ShoppingCart },
-    { id: 'reports', label: 'Reports', icon: FileText },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'abonos', label: 'Abonos', icon: CreditCard },
+    { id: 'reportes', label: 'Reportes', icon: FileText },
   ];
 
   return (
@@ -39,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
           </div>
           <div>
             <h1 className="text-xl font-bold text-secondary-900">CentPOS</h1>
-            <p className="text-sm text-secondary-500">Fintech Dashboard</p>
+            <p className="text-sm text-secondary-500">Sistema de Punto de Venta</p>
           </div>
         </div>
       </div>
@@ -74,7 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
             <User className="h-5 w-5 text-secondary-600" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-secondary-900">Admin User</p>
+            <p className="text-sm font-medium text-secondary-900">Usuario Admin</p>
             <p className="text-xs text-secondary-500">admin@centpos.com</p>
           </div>
           <button className="p-1 text-secondary-400 hover:text-secondary-600">
@@ -84,7 +79,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
         
         <button className="w-full flex items-center space-x-3 px-4 py-2 text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900 rounded-lg transition-colors duration-200">
           <LogOut className="h-4 w-4" />
-          <span className="text-sm font-medium">Sign Out</span>
+          <span className="text-sm font-medium">Cerrar Sesión</span>
         </button>
       </div>
     </div>

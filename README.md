@@ -1,17 +1,13 @@
 # CentPOS Dashboard
 
-A modern, responsive Point of Sale (POS) dashboard built for fintech companies using React, TypeScript, and Tailwind CSS.
+Un sistema moderno y responsivo de Punto de Venta (POS) construido para empresas fintech usando React, TypeScript y Tailwind CSS.
 
-## Features
+## Características
 
-- 🔐 **Secure Login System** - Modern authentication with form validation
-- 📊 **Dashboard Overview** - Real-time statistics and key metrics
-- 💳 **Transaction Processing** - Comprehensive transaction form with multiple payment methods
-- 👥 **Customer Management** - Customer information and history tracking
-- 📈 **Analytics & Reporting** - Business insights and performance metrics
-- 📦 **Inventory Management** - Product and stock management
-- ⚙️ **Settings Panel** - System configuration and preferences
-- 🎨 **Modern UI/UX** - Beautiful, responsive design with smooth animations
+- 🔐 **Sistema de Login Seguro** - Autenticación moderna con validación de formularios
+- 💳 **Procesamiento de Abonos** - Formulario completo de transacciones con múltiples métodos de pago
+- 📊 **Reportes** - Informes y métricas de negocio
+- 🎨 **UI/UX Moderna** - Diseño hermoso y responsivo con animaciones suaves
 
 ## Tech Stack
 
@@ -48,23 +44,23 @@ npm start
 
 4. Open your browser and navigate to `http://localhost:3000`
 
-### Demo Credentials
+### Credenciales Demo
 
-- **Username**: `admin`
-- **Password**: `password`
+- **Usuario**: `admin`
+- **Contraseña**: `password`
 
-## Project Structure
+## Estructura del Proyecto
 
 ```
 src/
 ├── components/
-│   ├── Login.tsx           # Authentication component
-│   ├── Dashboard.tsx       # Main dashboard layout
-│   ├── Sidebar.tsx         # Navigation sidebar
-│   └── TransactionForm.tsx # Transaction processing form
-├── App.tsx                 # Main application component
-├── index.tsx              # Application entry point
-└── index.css              # Global styles and Tailwind imports
+│   ├── Login.tsx           # Componente de autenticación
+│   ├── Dashboard.tsx       # Layout principal del dashboard
+│   ├── Sidebar.tsx         # Barra lateral de navegación
+│   └── TransactionForm.tsx # Formulario de procesamiento de abonos
+├── App.tsx                 # Componente principal de la aplicación
+├── index.tsx              # Punto de entrada de la aplicación
+└── index.css              # Estilos globales e imports de Tailwind
 ```
 
 ## Key Components

@@ -24,7 +24,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       if (formData.username === 'admin' && formData.password === 'password') {
         onLogin(true);
       } else {
-        setError('Invalid credentials. Try admin/password');
+        setError('Credenciales inválidas. Intenta admin/password');
       }
       setIsLoading(false);
     }, 1000);
@@ -48,7 +48,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             CentPOS Dashboard
           </h2>
           <p className="text-secondary-600">
-            Sign in to your fintech POS system
+            Inicia sesión en tu sistema de punto de venta
           </p>
         </div>
 
@@ -62,7 +62,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-secondary-700 mb-2">
-                Username
+                Usuario
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -74,7 +74,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   type="text"
                   required
                   className="input-field pl-10"
-                  placeholder="Enter your username"
+                  placeholder="Ingresa tu usuario"
                   value={formData.username}
                   onChange={handleChange}
                 />
@@ -83,7 +83,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-secondary-700 mb-2">
-                Password
+                Contraseña
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -95,7 +95,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   type={showPassword ? 'text' : 'password'}
                   required
                   className="input-field pl-10 pr-10"
-                  placeholder="Enter your password"
+                  placeholder="Ingresa tu contraseña"
                   value={formData.password}
                   onChange={handleChange}
                 />
@@ -122,12 +122,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-secondary-700">
-                  Remember me
+                  Recordarme
                 </label>
               </div>
               <div className="text-sm">
                 <button type="button" className="font-medium text-primary-600 hover:text-primary-500">
-                  Forgot password?
+                  ¿Olvidaste tu contraseña?
                 </button>
               </div>
             </div>
@@ -140,14 +140,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               {isLoading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
               ) : (
-                'Sign in'
+                'Iniciar Sesión'
               )}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-secondary-600">
-              Demo credentials: admin / password
+              Credenciales demo: admin / password
             </p>
           </div>
         </div>

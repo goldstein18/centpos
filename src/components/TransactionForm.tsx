@@ -29,7 +29,7 @@ const TransactionForm: React.FC = () => {
     // Simulate processing
     setTimeout(() => {
       setIsProcessing(false);
-      alert('Transaction processed successfully!');
+      alert('¡Pago procesado exitosamente!');
       setFormData({
         customerName: '',
         customerEmail: '',
@@ -50,8 +50,8 @@ const TransactionForm: React.FC = () => {
           <CreditCard className="h-5 w-5 text-primary-600" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-secondary-900">New Transaction</h2>
-          <p className="text-sm text-secondary-500">Process a new payment transaction</p>
+          <h2 className="text-xl font-semibold text-secondary-900">Nuevo Abono</h2>
+          <p className="text-sm text-secondary-500">Procesar un nuevo pago</p>
         </div>
       </div>
 
@@ -60,20 +60,20 @@ const TransactionForm: React.FC = () => {
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-secondary-900 flex items-center space-x-2">
             <User className="h-5 w-5 text-primary-600" />
-            <span>Customer Information</span>
+            <span>Información del Cliente</span>
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Customer Name *
+                Nombre del Cliente *
               </label>
               <input
                 type="text"
                 name="customerName"
                 required
                 className="input-field"
-                placeholder="Enter customer name"
+                                  placeholder="Ingresa el nombre del cliente"
                 value={formData.customerName}
                 onChange={handleChange}
               />
@@ -81,7 +81,7 @@ const TransactionForm: React.FC = () => {
             
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Email Address
+                Correo Electrónico
               </label>
               <input
                 type="email"
@@ -95,7 +95,7 @@ const TransactionForm: React.FC = () => {
             
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Phone Number
+                Número de Teléfono
               </label>
               <input
                 type="tel"
@@ -109,7 +109,7 @@ const TransactionForm: React.FC = () => {
             
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Payment Method *
+                Método de Pago *
               </label>
               <select
                 name="paymentMethod"
@@ -118,10 +118,10 @@ const TransactionForm: React.FC = () => {
                 value={formData.paymentMethod}
                 onChange={handleChange}
               >
-                <option value="card">Credit/Debit Card</option>
-                <option value="cash">Cash</option>
-                <option value="mobile">Mobile Payment</option>
-                <option value="bank">Bank Transfer</option>
+                <option value="card">Tarjeta de Crédito/Débito</option>
+                <option value="cash">Efectivo</option>
+                <option value="mobile">Pago Móvil</option>
+                <option value="bank">Transferencia Bancaria</option>
               </select>
             </div>
           </div>
@@ -131,20 +131,20 @@ const TransactionForm: React.FC = () => {
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-secondary-900 flex items-center space-x-2">
             <Package className="h-5 w-5 text-primary-600" />
-            <span>Product Information</span>
+            <span>Información del Producto</span>
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Product Name *
+                Nombre del Producto *
               </label>
               <input
                 type="text"
                 name="productName"
                 required
                 className="input-field"
-                placeholder="Enter product name"
+                                  placeholder="Ingresa el nombre del producto"
                 value={formData.productName}
                 onChange={handleChange}
               />
@@ -152,7 +152,7 @@ const TransactionForm: React.FC = () => {
             
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Quantity *
+                Cantidad *
               </label>
               <input
                 type="number"
@@ -167,7 +167,7 @@ const TransactionForm: React.FC = () => {
             
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Amount ($) *
+                Monto ($) *
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -193,18 +193,18 @@ const TransactionForm: React.FC = () => {
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-secondary-900 flex items-center space-x-2">
             <Calendar className="h-5 w-5 text-primary-600" />
-            <span>Additional Information</span>
+            <span>Información Adicional</span>
           </h3>
           
           <div>
             <label className="block text-sm font-medium text-secondary-700 mb-2">
-              Notes
+              Notas
             </label>
             <textarea
               name="notes"
               rows={3}
               className="input-field resize-none"
-              placeholder="Add any additional notes about this transaction..."
+              placeholder="Agrega notas adicionales sobre esta transacción..."
               value={formData.notes}
               onChange={handleChange}
             />
@@ -224,7 +224,7 @@ const TransactionForm: React.FC = () => {
                 Processing...
               </>
             ) : (
-              'Process Transaction'
+                              'Procesar Pago'
             )}
           </button>
           
@@ -244,7 +244,7 @@ const TransactionForm: React.FC = () => {
               });
             }}
           >
-            Clear Form
+            Limpiar Formulario
           </button>
         </div>
       </form>

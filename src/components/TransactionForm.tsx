@@ -1,46 +1,100 @@
 import React, { useState } from 'react';
-import { CreditCard, User, Package, DollarSign, Calendar } from 'lucide-react';
+import { CreditCard, Phone, DollarSign } from 'lucide-react';
 
 const TransactionForm: React.FC = () => {
   const [formData, setFormData] = useState({
-    customerName: '',
-    customerEmail: '',
-    customerPhone: '',
-    amount: '',
-    paymentMethod: 'card',
-    productName: '',
-    quantity: '1',
-    notes: ''
+    phone1: '',
+    phone2: '',
+    amount1: '',
+    amount2: ''
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    // Solo permitir números
+    const numericValue = value.replace(/[^0-9]/g, '');
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: numericValue
+    }));
+
+    // Limpiar errores cuando el usuario empiece a escribir
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  const formatAmount = (value: string) => {
+    if (!value) return '';
+    const num = parseInt(value);
+    return (num / 10).toFixed(1);
+  };
+
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {};
+
+    // Validar teléfono
+    if (formData.phone1 !== formData.phone2) {
+      newErrors.phone2 = 'Los números de teléfono no coinciden';
+    }
+    if (formData.phone1.length < 10) {
+      newErrors.phone1 = 'El número debe tener al menos 10 dígitos';
+    }
+
+    // Validar monto
+    if (formData.amount1 !== formData.amount2) {
+      newErrors.amount2 = 'Los montos no coinciden';
+    }
+    if (parseInt(formData.amount1) <= 0) {
+      newErrors.amount1 = 'El monto debe ser mayor a 0';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setIsProcessing(true);
     
-    // Simulate processing
+    // Simular procesamiento
     setTimeout(() => {
       setIsProcessing(false);
-      alert('¡Pago procesado exitosamente!');
+      const finalAmount = formatAmount(formData.amount1);
+      alert(`¡Abono registrado exitosamente!\n\nTeléfono: ${formData.phone1}\nMonto: $${finalAmount}`);
+      
+      // Limpiar formulario
       setFormData({
-        customerName: '',
-        customerEmail: '',
-        customerPhone: '',
-        amount: '',
-        paymentMethod: 'card',
-        productName: '',
-        quantity: '1',
-        notes: ''
+        phone1: '',
+        phone2: '',
+        amount1: '',
+        amount2: ''
       });
+      setErrors({});
     }, 2000);
+  };
+
+  const clearForm = () => {
+    setFormData({
+      phone1: '',
+      phone2: '',
+      amount1: '',
+      amount2: ''
+    });
+    setErrors({});
   };
 
   return (
@@ -50,121 +104,68 @@ const TransactionForm: React.FC = () => {
           <CreditCard className="h-5 w-5 text-primary-600" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-secondary-900">Nuevo Abono</h2>
-          <p className="text-sm text-secondary-500">Procesar un nuevo pago</p>
+          <h2 className="text-xl font-semibold text-secondary-900">Registrar Abono</h2>
+          <p className="text-sm text-secondary-500">Registra un nuevo abono al sistema</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Customer Information */}
+        {/* Número de Teléfono */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-secondary-900 flex items-center space-x-2">
-            <User className="h-5 w-5 text-primary-600" />
-            <span>Información del Cliente</span>
+            <Phone className="h-5 w-5 text-primary-600" />
+            <span>Número de Teléfono</span>
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Nombre del Cliente *
-              </label>
-              <input
-                type="text"
-                name="customerName"
-                required
-                className="input-field"
-                                  placeholder="Ingresa el nombre del cliente"
-                value={formData.customerName}
-                onChange={handleChange}
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Correo Electrónico
-              </label>
-              <input
-                type="email"
-                name="customerEmail"
-                className="input-field"
-                placeholder="customer@example.com"
-                value={formData.customerEmail}
-                onChange={handleChange}
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Número de Teléfono
+                Número de Teléfono *
               </label>
               <input
                 type="tel"
-                name="customerPhone"
-                className="input-field"
-                placeholder="+1 (555) 123-4567"
-                value={formData.customerPhone}
+                name="phone1"
+                required
+                className={`input-field ${errors.phone1 ? 'border-red-500' : ''}`}
+                placeholder="Ej: 5512345678"
+                value={formData.phone1}
                 onChange={handleChange}
+                maxLength={10}
               />
+              {errors.phone1 && (
+                <p className="text-red-500 text-sm mt-1">{errors.phone1}</p>
+              )}
             </div>
             
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Método de Pago *
+                Confirmar Número *
               </label>
-              <select
-                name="paymentMethod"
+              <input
+                type="tel"
+                name="phone2"
                 required
-                className="input-field"
-                value={formData.paymentMethod}
+                className={`input-field ${errors.phone2 ? 'border-red-500' : ''}`}
+                placeholder="Repite el número"
+                value={formData.phone2}
                 onChange={handleChange}
-              >
-                <option value="card">Tarjeta de Crédito/Débito</option>
-                <option value="cash">Efectivo</option>
-                <option value="mobile">Pago Móvil</option>
-                <option value="bank">Transferencia Bancaria</option>
-              </select>
+                maxLength={10}
+              />
+              {errors.phone2 && (
+                <p className="text-red-500 text-sm mt-1">{errors.phone2}</p>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Product Information */}
+        {/* Monto a Abonar */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-secondary-900 flex items-center space-x-2">
-            <Package className="h-5 w-5 text-primary-600" />
-            <span>Información del Producto</span>
+            <DollarSign className="h-5 w-5 text-primary-600" />
+            <span>Monto a Abonar</span>
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Nombre del Producto *
-              </label>
-              <input
-                type="text"
-                name="productName"
-                required
-                className="input-field"
-                                  placeholder="Ingresa el nombre del producto"
-                value={formData.productName}
-                onChange={handleChange}
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-secondary-700 mb-2">
-                Cantidad *
-              </label>
-              <input
-                type="number"
-                name="quantity"
-                required
-                min="1"
-                className="input-field"
-                value={formData.quantity}
-                onChange={handleChange}
-              />
-            </div>
-            
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-2">
                 Monto ($) *
@@ -174,41 +175,64 @@ const TransactionForm: React.FC = () => {
                   <DollarSign className="h-5 w-5 text-secondary-400" />
                 </div>
                 <input
-                  type="number"
-                  name="amount"
+                  type="text"
+                  name="amount1"
                   required
-                  step="0.01"
-                  min="0"
-                  className="input-field pl-10"
-                  placeholder="0.00"
-                  value={formData.amount}
+                  className={`input-field pl-10 ${errors.amount1 ? 'border-red-500' : ''}`}
+                  placeholder="Ej: 100 para $10.00"
+                  value={formData.amount1}
                   onChange={handleChange}
                 />
               </div>
+              {errors.amount1 && (
+                <p className="text-red-500 text-sm mt-1">{errors.amount1}</p>
+              )}
+              {formData.amount1 && (
+                <p className="text-sm text-secondary-600 mt-1">
+                  Monto real: ${formatAmount(formData.amount1)}
+                </p>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-secondary-700 mb-2">
+                Confirmar Monto *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <DollarSign className="h-5 w-5 text-secondary-400" />
+                </div>
+                <input
+                  type="text"
+                  name="amount2"
+                  required
+                  className={`input-field pl-10 ${errors.amount2 ? 'border-red-500' : ''}`}
+                  placeholder="Repite el monto"
+                  value={formData.amount2}
+                  onChange={handleChange}
+                />
+              </div>
+              {errors.amount2 && (
+                <p className="text-red-500 text-sm mt-1">{errors.amount2}</p>
+              )}
+              {formData.amount2 && (
+                <p className="text-sm text-secondary-600 mt-1">
+                  Monto real: ${formatAmount(formData.amount2)}
+                </p>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Additional Information */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-secondary-900 flex items-center space-x-2">
-            <Calendar className="h-5 w-5 text-primary-600" />
-            <span>Información Adicional</span>
-          </h3>
-          
-          <div>
-            <label className="block text-sm font-medium text-secondary-700 mb-2">
-              Notas
-            </label>
-            <textarea
-              name="notes"
-              rows={3}
-              className="input-field resize-none"
-              placeholder="Agrega notas adicionales sobre esta transacción..."
-              value={formData.notes}
-              onChange={handleChange}
-            />
-          </div>
+        {/* Información del Sistema */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-blue-900 mb-2">💡 Información del Sistema</h4>
+          <ul className="text-sm text-blue-800 space-y-1">
+            <li>• El monto se desplaza automáticamente a la izquierda</li>
+            <li>• Para abonar $10.00, introduce: 100</li>
+            <li>• Para abonar $1.50, introduce: 15</li>
+            <li>• Para abonar $0.50, introduce: 5</li>
+          </ul>
         </div>
 
         {/* Action Buttons */}
@@ -221,28 +245,17 @@ const TransactionForm: React.FC = () => {
             {isProcessing ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Processing...
+                Procesando...
               </>
             ) : (
-                              'Procesar Pago'
+              'Registrar Abono'
             )}
           </button>
           
           <button
             type="button"
             className="btn-secondary flex-1"
-            onClick={() => {
-              setFormData({
-                customerName: '',
-                customerEmail: '',
-                customerPhone: '',
-                amount: '',
-                paymentMethod: 'card',
-                productName: '',
-                quantity: '1',
-                notes: ''
-              });
-            }}
+            onClick={clearForm}
           >
             Limpiar Formulario
           </button>

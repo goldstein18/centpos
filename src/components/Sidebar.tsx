@@ -34,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
           </div>
           <div>
             <h1 className="text-xl font-bold text-secondary-900">CentPOS</h1>
-            <p className="text-sm text-secondary-500">Sistema de Punto de Venta</p>
+            <p className="text-sm text-secondary-500">Sistema de Abonos</p>
           </div>
         </div>
       </div>

@@ -1,11 +1,11 @@
-# CentPOS Dashboard
+# CentPOS - Sistema de Abonos
 
-Un sistema moderno y responsivo de Punto de Venta (POS) construido para empresas fintech usando React, TypeScript y Tailwind CSS.
+Un sistema moderno y responsivo para el registro de abonos construido con React, TypeScript y Tailwind CSS.
 
 ## Características
 
 - 🔐 **Sistema de Login Seguro** - Autenticación moderna con validación de formularios
-- 💳 **Procesamiento de Abonos** - Formulario completo de transacciones con múltiples métodos de pago
+- 💳 **Registro de Abonos** - Sistema simple para registrar abonos con verificación doble
 - 📊 **Reportes** - Informes y métricas de negocio
 - 🎨 **UI/UX Moderna** - Diseño hermoso y responsivo con animaciones suaves
 
@@ -57,38 +57,53 @@ src/
 │   ├── Login.tsx           # Componente de autenticación
 │   ├── Dashboard.tsx       # Layout principal del dashboard
 │   ├── Sidebar.tsx         # Barra lateral de navegación
-│   └── TransactionForm.tsx # Formulario de procesamiento de abonos
+│   └── TransactionForm.tsx # Formulario de registro de abonos
 ├── App.tsx                 # Componente principal de la aplicación
 ├── index.tsx              # Punto de entrada de la aplicación
 └── index.css              # Estilos globales e imports de Tailwind
 ```
 
-## Key Components
+## Componentes Principales
 
-### Login Component
-- Modern authentication form with validation
-- Password visibility toggle
-- Loading states and error handling
-- Remember me functionality
+### Componente de Login
+- Formulario de autenticación moderno con validación
+- Toggle de visibilidad de contraseña
+- Estados de carga y manejo de errores
+- Funcionalidad "Recordarme"
 
 ### Dashboard
-- Overview with key business metrics
-- Recent transaction history
-- Quick action buttons
-- Responsive grid layout
+- Navegación simple entre Abonos y Reportes
+- Interfaz limpia y responsiva
+- Diseño optimizado para el flujo de trabajo
 
-### Sidebar Navigation
-- Clean navigation menu
-- Active state indicators
-- User profile section
-- Notification system
+### Barra Lateral de Navegación
+- Menú de navegación limpio
+- Indicadores de estado activo
+- Sección de perfil de usuario
+- Sistema de notificaciones
 
-### Transaction Form
-- Comprehensive customer information fields
-- Multiple payment method support
-- Product and quantity management
-- Notes and additional information
-- Form validation and processing states
+### Formulario de Registro de Abonos
+- **Número de teléfono**: Introducido dos veces para verificación
+- **Monto a abonar**: Introducido dos veces para verificación
+- **Sistema de desplazamiento**: El monto se desplaza automáticamente a la izquierda
+- **Validación en tiempo real**: Verificación de coincidencia de datos
+- **Interfaz intuitiva**: Guías visuales para el usuario
+
+## Cómo Funciona el Sistema de Abonos
+
+### Registro de Abonos
+1. **Número de Teléfono**: Se introduce dos veces para evitar errores
+2. **Monto**: Se introduce dos veces para verificación
+3. **Desplazamiento Automático**: El sistema convierte automáticamente los números:
+   - `100` → `$10.00`
+   - `15` → `$1.50`
+   - `5` → `$0.50`
+
+### Validaciones
+- Número de teléfono debe tener al menos 10 dígitos
+- Los números de teléfono deben coincidir
+- Los montos deben coincidir
+- Solo se permiten números (sin letras ni símbolos)
 
 ## Customization
 

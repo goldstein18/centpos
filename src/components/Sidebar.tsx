@@ -23,8 +23,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
       {/* Header */}
       <div className="p-6 border-b border-secondary-200">
         <div className="flex items-center space-x-3">
-          <div className="h-10 w-10">
-            <img src="/icon.png" alt="CentPOS Logo" className="h-10 w-10 rounded-lg" />
+          <div className="h-10 w-10 bg-[#3bbcc8] rounded-lg flex items-center justify-center">
+            <span className="text-white text-lg font-bold">C</span>
           </div>
           <div>
             <h1 className="text-xl font-bold text-secondary-900">CentPOS</h1>

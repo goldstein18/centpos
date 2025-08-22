@@ -106,8 +106,8 @@ const TransactionForm: React.FC = () => {
   return (
     <div className="card p-6">
       <div className="flex items-center space-x-3 mb-6">
-        <div className="h-10 w-10 bg-primary-100 rounded-lg flex items-center justify-center">
-          <CreditCard className="h-5 w-5 text-primary-600" />
+        <div className="h-10 w-10 bg-[#f0fdfd] rounded-lg flex items-center justify-center">
+          <CreditCard className="h-5 w-5 text-[#3bbcc8]" />
         </div>
         <div>
           <h2 className="text-xl font-semibold text-secondary-900">Registrar Abono</h2>
@@ -119,7 +119,7 @@ const TransactionForm: React.FC = () => {
         {/* Número de Teléfono */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-secondary-900 flex items-center space-x-2">
-            <Phone className="h-5 w-5 text-primary-600" />
+            <Phone className="h-5 w-5 text-[#3bbcc8]" />
             <span>Número de Teléfono</span>
           </h3>
           
@@ -167,7 +167,7 @@ const TransactionForm: React.FC = () => {
         {/* Monto a Abonar */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-secondary-900 flex items-center space-x-2">
-            <DollarSign className="h-5 w-5 text-primary-600" />
+            <DollarSign className="h-5 w-5 text-[#3bbcc8]" />
             <span>Monto a Abonar</span>
           </h3>
           
@@ -221,9 +221,9 @@ const TransactionForm: React.FC = () => {
         </div>
 
         {/* Información del Sistema */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="text-sm font-medium text-blue-900 mb-2">💡 Información del Sistema</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
+        <div className="bg-[#f0fdfd] border border-[#3bbcc8] rounded-lg p-4">
+          <h4 className="text-sm font-medium text-[#0d9488] mb-2">💡 Información del Sistema</h4>
+          <ul className="text-sm text-[#0d9488] space-y-1">
             <li>• El monto se formatea automáticamente en el campo</li>
             <li>• Para abonar $10.00, introduce: 100</li>
             <li>• Para abonar $1.50, introduce: 15</li>

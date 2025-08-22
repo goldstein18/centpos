@@ -29,7 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
       {/* Header */}
       <div className="p-6 border-b border-secondary-200">
         <div className="flex items-center space-x-3">
-          <div className="h-10 w-10 bg-primary-600 rounded-lg flex items-center justify-center">
+          <div className="h-10 w-10 bg-[#3bbcc8] rounded-lg flex items-center justify-center">
             <DollarSign className="h-6 w-6 text-white" />
           </div>
           <div>
@@ -51,11 +51,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
               onClick={() => onSectionChange(item.id)}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors duration-200 ${
                 isActive
-                  ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-600'
+                  ? 'bg-[#f0fdfd] text-[#0d9488] border-r-2 border-[#3bbcc8]'
                   : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900'
               }`}
             >
-              <Icon className={`h-5 w-5 ${isActive ? 'text-primary-600' : 'text-secondary-400'}`} />
+              <Icon className={`h-5 w-5 ${isActive ? 'text-[#3bbcc8]' : 'text-secondary-400'}`} />
               <span className="font-medium">{item.label}</span>
             </button>
           );

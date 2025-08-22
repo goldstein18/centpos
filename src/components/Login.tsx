@@ -41,7 +41,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-100 p-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-primary-600 rounded-full flex items-center justify-center mb-4">
+          <div className="mx-auto h-16 w-16 bg-[#3bbcc8] rounded-full flex items-center justify-center mb-4">
             <CreditCard className="h-8 w-8 text-white" />
           </div>
           <h2 className="text-3xl font-bold text-secondary-900 mb-2">
@@ -119,14 +119,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded"
+                  className="h-4 w-4 text-[#3bbcc8] focus:ring-[#3bbcc8] border-secondary-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-secondary-700">
                   Recordarme
                 </label>
               </div>
               <div className="text-sm">
-                <button type="button" className="font-medium text-primary-600 hover:text-primary-500">
+                <button type="button" className="font-medium text-[#3bbcc8] hover:text-[#0d9488]">
                   ¿Olvidaste tu contraseña?
                 </button>
               </div>

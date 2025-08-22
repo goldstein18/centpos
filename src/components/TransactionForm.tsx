@@ -15,12 +15,12 @@ const TransactionForm: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
-    // Solo permitir números
-    const numericValue = value.replace(/[^0-9]/g, '');
+    // Remover el punto decimal y convertir a número
+    const cleanValue = value.replace(/[^0-9]/g, '');
     
     setFormData(prev => ({
       ...prev,
-      [name]: numericValue
+      [name]: cleanValue
     }));
 
     // Limpiar errores cuando el usuario empiece a escribir
@@ -30,6 +30,12 @@ const TransactionForm: React.FC = () => {
         [name]: ''
       }));
     }
+  };
+
+  const getDisplayValue = (value: string) => {
+    if (!value) return '';
+    const num = parseInt(value);
+    return (num / 10).toFixed(1);
   };
 
   const formatAmount = (value: string) => {
@@ -180,17 +186,12 @@ const TransactionForm: React.FC = () => {
                   required
                   className={`input-field pl-10 ${errors.amount1 ? 'border-red-500' : ''}`}
                   placeholder="Ej: 100 para $10.00"
-                  value={formData.amount1}
+                  value={getDisplayValue(formData.amount1)}
                   onChange={handleChange}
                 />
               </div>
               {errors.amount1 && (
                 <p className="text-red-500 text-sm mt-1">{errors.amount1}</p>
-              )}
-              {formData.amount1 && (
-                <p className="text-sm text-secondary-600 mt-1">
-                  Monto real: ${formatAmount(formData.amount1)}
-                </p>
               )}
             </div>
             
@@ -208,17 +209,12 @@ const TransactionForm: React.FC = () => {
                   required
                   className={`input-field pl-10 ${errors.amount2 ? 'border-red-500' : ''}`}
                   placeholder="Repite el monto"
-                  value={formData.amount2}
+                  value={getDisplayValue(formData.amount2)}
                   onChange={handleChange}
                 />
               </div>
               {errors.amount2 && (
                 <p className="text-red-500 text-sm mt-1">{errors.amount2}</p>
-              )}
-              {formData.amount2 && (
-                <p className="text-sm text-secondary-600 mt-1">
-                  Monto real: ${formatAmount(formData.amount2)}
-                </p>
               )}
             </div>
           </div>
@@ -228,7 +224,7 @@ const TransactionForm: React.FC = () => {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h4 className="text-sm font-medium text-blue-900 mb-2">💡 Información del Sistema</h4>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>• El monto se desplaza automáticamente a la izquierda</li>
+            <li>• El monto se formatea automáticamente en el campo</li>
             <li>• Para abonar $10.00, introduce: 100</li>
             <li>• Para abonar $1.50, introduce: 15</li>
             <li>• Para abonar $0.50, introduce: 5</li>

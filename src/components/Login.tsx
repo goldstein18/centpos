@@ -41,8 +41,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-100 p-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-[#3bbcc8] rounded-full flex items-center justify-center mb-4">
-            <span className="text-white text-2xl font-bold">C</span>
+          <div className="mx-auto h-16 w-16 mb-4">
+            <img src="/logo.png" alt="CentPOS Logo" className="h-16 w-16 rounded-full" />
           </div>
           <h2 className="text-3xl font-bold text-secondary-900 mb-2">
             CentPOS Dashboard

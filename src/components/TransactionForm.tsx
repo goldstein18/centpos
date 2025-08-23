@@ -54,6 +54,9 @@ const TransactionForm: React.FC = () => {
     if (formData.phone1.length < 10) {
       newErrors.phone1 = 'El número debe tener al menos 10 dígitos';
     }
+    if (!/^\d{10}$/.test(formData.phone1)) {
+      newErrors.phone1 = 'El número debe tener exactamente 10 dígitos numéricos';
+    }
 
     // Validar monto
     if (formData.amount1 !== formData.amount2) {
@@ -78,18 +81,25 @@ const TransactionForm: React.FC = () => {
     
     try {
       const finalAmount = formatAmount(formData.amount1);
+      const requestBody = {
+        telefono: formData.phone1,
+        telefonoConfirmacion: formData.phone2,
+        monto: parseFloat(finalAmount),
+        montoConfirmacion: parseFloat(finalAmount)
+      };
+      
+      console.log('Sending request to API:', {
+        url: 'https://centback-production.up.railway.app/abonos',
+        method: 'POST',
+        body: requestBody
+      });
       
       const response = await fetch('https://centback-production.up.railway.app/abonos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          telefono: formData.phone1,
-          telefonoConfirmacion: formData.phone2,
-          monto: parseFloat(finalAmount),
-          montoConfirmacion: parseFloat(finalAmount)
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (response.ok) {
@@ -106,7 +116,18 @@ const TransactionForm: React.FC = () => {
         setErrors({});
       } else {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+        console.error('API Error Details:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData: errorData,
+          requestBody: {
+            telefono: formData.phone1,
+            telefonoConfirmacion: formData.phone2,
+            monto: parseFloat(finalAmount),
+            montoConfirmacion: parseFloat(finalAmount)
+          }
+        });
+        throw new Error(errorData.message || errorData.error || `Error ${response.status}: ${response.statusText}`);
       }
     } catch (error) {
       console.error('Error al registrar abono:', error);

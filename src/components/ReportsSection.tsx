@@ -305,7 +305,6 @@ const ReportsSection: React.FC = () => {
             <li>• Sucursal y Usuario están fijos en "prueba" para desarrollo</li>
             <li>• Solo las fechas son filtros opcionales</li>
             <li>• Las fechas deben estar en formato YYYY-MM-DD</li>
-            <li>• El reporte sin teléfonos es ideal para análisis estadísticos</li>
             <li>• Los archivos se nombran automáticamente con la fecha actual</li>
           </ul>
         </div>

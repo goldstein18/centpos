@@ -1,0 +1,304 @@
+import React, { useState } from 'react';
+import { Download, FileText, Calendar, Building, User, Filter } from 'lucide-react';
+
+const ReportsSection: React.FC = () => {
+  const [filters, setFilters] = useState({
+    sucursal: '',
+    usuario: '',
+    fechaInicio: '',
+    fechaFin: ''
+  });
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadType, setDownloadType] = useState<'with-phone' | 'without-phone'>('with-phone');
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const buildQueryString = () => {
+    const params = new URLSearchParams();
+    
+    if (filters.sucursal) params.append('sucursal', filters.sucursal);
+    if (filters.usuario) params.append('usuario', filters.usuario);
+    if (filters.fechaInicio) params.append('fechaInicio', filters.fechaInicio);
+    if (filters.fechaFin) params.append('fechaFin', filters.fechaFin);
+    
+    return params.toString();
+  };
+
+  const downloadReport = async (type: 'with-phone' | 'without-phone') => {
+    setIsDownloading(true);
+    setDownloadType(type);
+    
+    try {
+      const endpoint = type === 'with-phone' 
+        ? 'https://centback-production.up.railway.app/abonos/reporte/csv'
+        : 'https://centback-production.up.railway.app/abonos/reporte/csv-sin-telefono';
+      
+      const queryString = buildQueryString();
+      const url = queryString ? `${endpoint}?${queryString}` : endpoint;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `reporte-abonos-${type === 'with-phone' ? 'con-telefono' : 'sin-telefono'}-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+        
+        alert(`Reporte descargado exitosamente: ${link.download}`);
+      } else {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Error al descargar reporte:', error);
+      alert(`Error al descargar el reporte: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      sucursal: '',
+      usuario: '',
+      fechaInicio: '',
+      fechaFin: ''
+    });
+  };
+
+  const hasActiveFilters = Object.values(filters).some(value => value !== '');
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="card p-6">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="h-10 w-10 bg-primary-50 rounded-lg flex items-center justify-center">
+            <FileText className="h-5 w-5 text-primary-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-secondary-900">Reportes de Abonos</h2>
+            <p className="text-sm text-secondary-500">Descarga reportes CSV de abonos registrados</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters Section */}
+      <div className="card p-6">
+        <div className="flex items-center space-x-2 mb-4">
+          <Filter className="h-5 w-5 text-primary-600" />
+          <h3 className="text-lg font-medium text-secondary-900">Filtros de Reporte</h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Sucursal Filter */}
+          <div>
+            <label className="block text-sm font-medium text-secondary-700 mb-2">
+              <Building className="h-4 w-4 inline mr-1" />
+              Sucursal
+            </label>
+            <input
+              type="text"
+              name="sucursal"
+              className="input-field"
+              placeholder="Ej: Centro"
+              value={filters.sucursal}
+              onChange={handleFilterChange}
+            />
+          </div>
+
+          {/* Usuario Filter */}
+          <div>
+            <label className="block text-sm font-medium text-secondary-700 mb-2">
+              <User className="h-4 w-4 inline mr-1" />
+              Usuario
+            </label>
+            <input
+              type="text"
+              name="usuario"
+              className="input-field"
+              placeholder="Ej: Cohen"
+              value={filters.usuario}
+              onChange={handleFilterChange}
+            />
+          </div>
+
+          {/* Fecha Inicio */}
+          <div>
+            <label className="block text-sm font-medium text-secondary-700 mb-2">
+              <Calendar className="h-4 w-4 inline mr-1" />
+              Fecha Inicio
+            </label>
+            <input
+              type="date"
+              name="fechaInicio"
+              className="input-field"
+              value={filters.fechaInicio}
+              onChange={handleFilterChange}
+            />
+          </div>
+
+          {/* Fecha Fin */}
+          <div>
+            <label className="block text-sm font-medium text-secondary-700 mb-2">
+              <Calendar className="h-4 w-4 inline mr-1" />
+              Fecha Fin
+            </label>
+            <input
+              type="date"
+              name="fechaFin"
+              className="input-field"
+              value={filters.fechaFin}
+              onChange={handleFilterChange}
+            />
+          </div>
+        </div>
+
+        {/* Filter Actions */}
+        <div className="flex justify-between items-center mt-4 pt-4 border-t border-secondary-200">
+          <div className="text-sm text-secondary-600">
+            {hasActiveFilters && (
+              <span className="flex items-center">
+                <Filter className="h-4 w-4 mr-1" />
+                Filtros activos
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={clearFilters}
+            disabled={!hasActiveFilters}
+          >
+            Limpiar Filtros
+          </button>
+        </div>
+      </div>
+
+      {/* Download Options */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Report with Phone Numbers */}
+        <div className="card p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="h-12 w-12 bg-green-50 rounded-lg flex items-center justify-center">
+              <FileText className="h-6 w-6 text-green-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-secondary-900">Reporte con Teléfonos</h3>
+              <p className="text-sm text-secondary-500">Incluye números de teléfono en el reporte</p>
+            </div>
+          </div>
+
+          <div className="space-y-3 mb-4">
+            <div className="text-sm text-secondary-600">
+              <p className="font-medium mb-2">Columnas incluidas:</p>
+              <ul className="space-y-1 text-xs">
+                <li>• Teléfono</li>
+                <li>• Monto</li>
+                <li>• Tipo</li>
+                <li>• Autorización</li>
+                <li>• Sucursal</li>
+                <li>• Usuario</li>
+                <li>• Fecha (México)</li>
+              </ul>
+            </div>
+          </div>
+
+          <button
+            onClick={() => downloadReport('with-phone')}
+            disabled={isDownloading}
+            className="btn-primary w-full flex justify-center items-center"
+          >
+            {isDownloading && downloadType === 'with-phone' ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Descargando...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Descargar CSV con Teléfonos
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Report without Phone Numbers */}
+        <div className="card p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="h-12 w-12 bg-blue-50 rounded-lg flex items-center justify-center">
+              <FileText className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-secondary-900">Reporte sin Teléfonos</h3>
+              <p className="text-sm text-secondary-500">Reporte anonimizado sin números de teléfono</p>
+            </div>
+          </div>
+
+          <div className="space-y-3 mb-4">
+            <div className="text-sm text-secondary-600">
+              <p className="font-medium mb-2">Columnas incluidas:</p>
+              <ul className="space-y-1 text-xs">
+                <li>• Monto</li>
+                <li>• Tipo</li>
+                <li>• Autorización</li>
+                <li>• Sucursal</li>
+                <li>• Usuario</li>
+                <li>• Fecha (México)</li>
+              </ul>
+            </div>
+          </div>
+
+          <button
+            onClick={() => downloadReport('without-phone')}
+            disabled={isDownloading}
+            className="btn-primary w-full flex justify-center items-center"
+          >
+            {isDownloading && downloadType === 'without-phone' ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Descargando...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Descargar CSV sin Teléfonos
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Information Section */}
+      <div className="card p-6">
+        <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-primary-800 mb-2">💡 Información sobre los Reportes</h4>
+          <ul className="text-sm text-primary-700 space-y-1">
+            <li>• Los reportes se descargan en formato CSV</li>
+            <li>• Todos los filtros son opcionales</li>
+            <li>• Las fechas deben estar en formato YYYY-MM-DD</li>
+            <li>• El reporte sin teléfonos es ideal para análisis estadísticos</li>
+            <li>• Los archivos se nombran automáticamente con la fecha actual</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ReportsSection;

@@ -67,7 +67,7 @@ const TransactionForm: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -76,21 +76,45 @@ const TransactionForm: React.FC = () => {
 
     setIsProcessing(true);
     
-    // Simular procesamiento
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
       const finalAmount = formatAmount(formData.amount1);
-      alert(`¡Abono registrado exitosamente!\n\nTeléfono: ${formData.phone1}\nMonto: $${finalAmount}`);
       
-      // Limpiar formulario
-      setFormData({
-        phone1: '',
-        phone2: '',
-        amount1: '',
-        amount2: ''
+      const response = await fetch('https://centback-production.up.railway.app/abonos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          telefono: formData.phone1,
+          telefonoConfirmacion: formData.phone2,
+          monto: parseFloat(finalAmount),
+          montoConfirmacion: parseFloat(finalAmount),
+          tipo: 'abono'
+        })
       });
-      setErrors({});
-    }, 2000);
+
+      if (response.ok) {
+        const result = await response.json();
+        alert(`¡Abono registrado exitosamente!\n\nTeléfono: ${formData.phone1}\nMonto: $${finalAmount}\nAutorización: ${result.autorizacion || 'N/A'}`);
+        
+        // Limpiar formulario
+        setFormData({
+          phone1: '',
+          phone2: '',
+          amount1: '',
+          amount2: ''
+        });
+        setErrors({});
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Error al registrar abono:', error);
+      alert(`Error al registrar el abono: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const clearForm = () => {

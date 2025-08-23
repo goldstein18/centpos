@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreditCard, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Lock, User, Eye, EyeOff } from 'lucide-react';
 
 interface LoginProps {
   onLogin: (success: boolean) => void;

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
+import Timer from './components/Timer';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -13,6 +14,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-secondary-50">
+        <Timer />
         <Routes>
           <Route 
             path="/login" 

@@ -88,8 +88,7 @@ const TransactionForm: React.FC = () => {
           telefono: formData.phone1,
           telefonoConfirmacion: formData.phone2,
           monto: parseFloat(finalAmount),
-          montoConfirmacion: parseFloat(finalAmount),
-          tipo: 'abono'
+          montoConfirmacion: parseFloat(finalAmount)
         })
       });
 

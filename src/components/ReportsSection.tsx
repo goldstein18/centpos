@@ -3,8 +3,8 @@ import { Download, FileText, Calendar, Building, User, Filter } from 'lucide-rea
 
 const ReportsSection: React.FC = () => {
   const [filters, setFilters] = useState({
-    sucursal: '',
-    usuario: '',
+    sucursal: 'prueba',
+    usuario: 'prueba',
     fechaInicio: '',
     fechaFin: ''
   });
@@ -74,14 +74,14 @@ const ReportsSection: React.FC = () => {
 
   const clearFilters = () => {
     setFilters({
-      sucursal: '',
-      usuario: '',
+      sucursal: 'prueba',
+      usuario: 'prueba',
       fechaInicio: '',
       fechaFin: ''
     });
   };
 
-  const hasActiveFilters = Object.values(filters).some(value => value !== '');
+  const hasActiveFilters = filters.fechaInicio !== '' || filters.fechaFin !== '';
 
   return (
     <div className="space-y-6">
@@ -112,14 +112,20 @@ const ReportsSection: React.FC = () => {
               <Building className="h-4 w-4 inline mr-1" />
               Sucursal
             </label>
-            <input
-              type="text"
-              name="sucursal"
-              className="input-field"
-              placeholder="Ej: Centro"
-              value={filters.sucursal}
-              onChange={handleFilterChange}
-            />
+            <div className="relative">
+              <input
+                type="text"
+                name="sucursal"
+                className="input-field bg-secondary-100 cursor-not-allowed"
+                value={filters.sucursal}
+                disabled
+                readOnly
+              />
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <span className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded-full">Fijo</span>
+              </div>
+            </div>
+            <p className="text-xs text-secondary-500 mt-1">Valor fijo para pruebas</p>
           </div>
 
           {/* Usuario Filter */}
@@ -128,14 +134,20 @@ const ReportsSection: React.FC = () => {
               <User className="h-4 w-4 inline mr-1" />
               Usuario
             </label>
-            <input
-              type="text"
-              name="usuario"
-              className="input-field"
-              placeholder="Ej: Cohen"
-              value={filters.usuario}
-              onChange={handleFilterChange}
-            />
+            <div className="relative">
+              <input
+                type="text"
+                name="usuario"
+                className="input-field bg-secondary-100 cursor-not-allowed"
+                value={filters.usuario}
+                disabled
+                readOnly
+              />
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <span className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded-full">Fijo</span>
+              </div>
+            </div>
+            <p className="text-xs text-secondary-500 mt-1">Valor fijo para pruebas</p>
           </div>
 
           {/* Fecha Inicio */}
@@ -290,7 +302,8 @@ const ReportsSection: React.FC = () => {
           <h4 className="text-sm font-medium text-primary-800 mb-2">💡 Información sobre los Reportes</h4>
           <ul className="text-sm text-primary-700 space-y-1">
             <li>• Los reportes se descargan en formato CSV</li>
-            <li>• Todos los filtros son opcionales</li>
+            <li>• Sucursal y Usuario están fijos en "prueba" para desarrollo</li>
+            <li>• Solo las fechas son filtros opcionales</li>
             <li>• Las fechas deben estar en formato YYYY-MM-DD</li>
             <li>• El reporte sin teléfonos es ideal para análisis estadísticos</li>
             <li>• Los archivos se nombran automáticamente con la fecha actual</li>

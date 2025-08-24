@@ -22,8 +22,7 @@ const ReportsSection: React.FC = () => {
   const buildQueryString = () => {
     const params = new URLSearchParams();
     
-    if (filters.sucursal) params.append('sucursal', filters.sucursal);
-    if (filters.usuario) params.append('usuario', filters.usuario);
+    // Solo agregar parámetros si hay fechas seleccionadas
     if (filters.fechaInicio) params.append('fechaInicio', filters.fechaInicio);
     if (filters.fechaFin) params.append('fechaFin', filters.fechaFin);
     
@@ -42,16 +41,47 @@ const ReportsSection: React.FC = () => {
       const queryString = buildQueryString();
       const url = queryString ? `${endpoint}?${queryString}` : endpoint;
       
+      console.log('Descargando reporte:', {
+        type: type,
+        url: url,
+        queryString: queryString,
+        filters: filters
+      });
+      
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'text/csv,application/json',
+          'Cache-Control': 'no-cache'
         }
+      });
+
+      console.log('Respuesta del servidor:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        ok: response.ok
       });
 
       if (response.ok) {
         const blob = await response.blob();
-        const downloadUrl = window.URL.createObjectURL(blob);
+        console.log('Blob recibido:', {
+          size: blob.size,
+          type: blob.type
+        });
+        
+        if (blob.size === 0) {
+          throw new Error('El archivo CSV está vacío. No hay datos para descargar.');
+        }
+        
+        // Leer el contenido del blob para debug
+        const text = await blob.text();
+        console.log('Contenido del CSV:', text.substring(0, 500)); // Primeros 500 caracteres
+        
+        // Crear un nuevo blob con el contenido leído
+        const newBlob = new Blob([text], { type: 'text/csv' });
+        
+        const downloadUrl = window.URL.createObjectURL(newBlob);
         const link = document.createElement('a');
         link.href = downloadUrl;
         link.download = `reporte-abonos-${type === 'with-phone' ? 'con-telefono' : 'sin-telefono'}-${new Date().toISOString().split('T')[0]}.csv`;
@@ -62,7 +92,9 @@ const ReportsSection: React.FC = () => {
         
         alert(`Reporte descargado exitosamente: ${link.download}`);
       } else {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('Error response body:', errorText);
+        throw new Error(`Error ${response.status}: ${response.statusText} - ${errorText}`);
       }
     } catch (error) {
       console.error('Error al descargar reporte:', error);
@@ -82,6 +114,8 @@ const ReportsSection: React.FC = () => {
   };
 
   const hasActiveFilters = filters.fechaInicio !== '' || filters.fechaFin !== '';
+
+
 
   return (
     <div className="space-y-6">
@@ -191,14 +225,24 @@ const ReportsSection: React.FC = () => {
               </span>
             )}
           </div>
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={clearFilters}
-            disabled={!hasActiveFilters}
-          >
-            Limpiar Filtros
-          </button>
+          <div className="flex justify-between items-center mt-4 pt-4 border-t border-secondary-200">
+            <div className="text-sm text-secondary-600">
+              {hasActiveFilters && (
+                <span className="flex items-center">
+                  <Filter className="h-4 w-4 mr-1" />
+                  Filtros activos
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={clearFilters}
+              disabled={!hasActiveFilters}
+            >
+              Limpiar Filtros
+            </button>
+          </div>
         </div>
       </div>
 

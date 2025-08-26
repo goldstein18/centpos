@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import TransactionForm from './TransactionForm';
 import ReportsSection from './ReportsSection';
+import GestionSection from './GestionSection';
+import ClientesSection from './ClientesSection';
+import AtencionSection from './AtencionSection';
 
 const Dashboard: React.FC = () => {
   const [activeSection, setActiveSection] = useState('abonos');
@@ -12,6 +15,12 @@ const Dashboard: React.FC = () => {
         return <TransactionForm />;
       case 'reportes':
         return <ReportsSection />;
+      case 'gestion':
+        return <GestionSection />;
+      case 'clientes':
+        return <ClientesSection />;
+      case 'atencion':
+        return <AtencionSection />;
       default:
         return <TransactionForm />;
     }

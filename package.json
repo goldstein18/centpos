@@ -1,5 +1,5 @@
 {
-  "name": "centpos-dashboard",
+  "name": "centadmin-dashboard",
   "version": "1.0.0",
   "private": true,
   "dependencies": {

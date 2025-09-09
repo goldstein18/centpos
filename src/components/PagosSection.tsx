@@ -20,7 +20,6 @@ const PagosSection: React.FC = () => {
   const [otpCode, setOtpCode] = useState('');
   const [showAmount, setShowAmount] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentType, setPaymentType] = useState<'transferencia' | 'sucursal'>('transferencia');
 
   const formatAmount = (value: string) => {
     // Remove any non-numeric characters
@@ -70,13 +69,8 @@ const PagosSection: React.FC = () => {
       return;
     }
     
-    // Check if amount is less than 1000 pesos
+    // Check if amount is greater than 0
     const numericAmount = parseFloat(amount.replace(/[^\d.]/g, ''));
-    if (numericAmount >= 1000) {
-      alert('El monto debe ser menor a $1,000.00');
-      return;
-    }
-    
     if (numericAmount <= 0) {
       alert('El monto debe ser mayor a $0.00');
       return;
@@ -183,39 +177,9 @@ const PagosSection: React.FC = () => {
           <DollarSign className="h-8 w-8 text-green-600" />
         </div>
         <h3 className="text-xl font-semibold text-secondary-900 mb-2">Monto a Abonar</h3>
-        <p className="text-secondary-600">Ingresa el monto dos veces para confirmar (máximo $999.99)</p>
+        <p className="text-secondary-600">Ingresa el monto dos veces para confirmar</p>
       </div>
 
-      {/* Payment Type Selection */}
-      <div className="card p-4">
-        <h4 className="text-sm font-medium text-secondary-700 mb-3">Tipo de Pago</h4>
-        <div className="flex space-x-4">
-          <button
-            onClick={() => setPaymentType('transferencia')}
-            className={`flex-1 p-3 rounded-lg border-2 transition-colors ${
-              paymentType === 'transferencia'
-                ? 'border-primary-500 bg-primary-50 text-primary-700'
-                : 'border-secondary-200 text-secondary-600 hover:border-secondary-300'
-            }`}
-          >
-            <div className="text-center">
-              <div className="text-sm font-medium">Transferencia</div>
-            </div>
-          </button>
-          <button
-            onClick={() => setPaymentType('sucursal')}
-            className={`flex-1 p-3 rounded-lg border-2 transition-colors ${
-              paymentType === 'sucursal'
-                ? 'border-primary-500 bg-primary-50 text-primary-700'
-                : 'border-secondary-200 text-secondary-600 hover:border-secondary-300'
-            }`}
-          >
-            <div className="text-center">
-              <div className="text-sm font-medium">Pago en Sucursal</div>
-            </div>
-          </button>
-        </div>
-      </div>
 
       <div className="space-y-4">
         <div>
@@ -370,10 +334,6 @@ const PagosSection: React.FC = () => {
           <div className="flex justify-between">
             <span className="text-secondary-600">Monto:</span>
             <span className="font-medium">{formatAmount(amount)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-secondary-600">Tipo de Pago:</span>
-            <span className="font-medium capitalize">{paymentType}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-secondary-600">Fecha:</span>

@@ -1,4 +1,4 @@
-# CENTAdmin - Sistema de Abonos
+# CENTPOS - Sistema de Abonos
 
 Un sistema moderno y responsivo para el registro de abonos construido con React, TypeScript y Tailwind CSS.
 
@@ -29,7 +29,7 @@ Un sistema moderno y responsivo para el registro de abonos construido con React,
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd centadminfront
+cd centposfront
 ```
 
 2. Install dependencies:

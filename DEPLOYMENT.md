@@ -1,6 +1,6 @@
-# Deploying CENTAdmin Dashboard to Vercel
+# Deploying CENTPOS Dashboard to Vercel
 
-This guide will walk you through deploying your CENTAdmin dashboard to Vercel step by step.
+This guide will walk you through deploying your CENTPOS dashboard to Vercel step by step.
 
 ## Prerequisites
 
@@ -14,21 +14,21 @@ This guide will walk you through deploying your CENTAdmin dashboard to Vercel st
 ```bash
 git init
 git add .
-git commit -m "Initial commit: CENTAdmin Dashboard"
+git commit -m "Initial commit: CENTPOS Dashboard"
 ```
 
 ### 1.2 Create GitHub Repository
 1. Go to [GitHub](https://github.com) and sign in
 2. Click the "+" icon in the top right corner
 3. Select "New repository"
-4. Name it `centadmin-dashboard` (or your preferred name)
+4. Name it `centpos-dashboard` (or your preferred name)
 5. Make it **Public** (Vercel works best with public repos)
 6. Don't initialize with README (since we already have one)
 7. Click "Create repository"
 
 ### 1.3 Push Code to GitHub
 ```bash
-git remote add origin https://github.com/YOUR_USERNAME/centadmin-dashboard.git
+git remote add origin https://github.com/YOUR_USERNAME/centpos-dashboard.git
 git branch -M main
 git push -u origin main
 ```
@@ -40,7 +40,7 @@ git push -u origin main
 2. Click "New Project"
 3. Import your GitHub repository:
    - Click "Import Git Repository"
-   - Find and select your `centadmin-dashboard` repository
+   - Find and select your `centpos-dashboard` repository
    - Click "Import"
 
 ### 2.2 Configure Project Settings
@@ -156,4 +156,4 @@ After successful deployment:
 
 ---
 
-Your CENTAdmin dashboard is now live and ready for production use! 🚀
+Your CENTPOS dashboard is now live and ready for production use! 🚀

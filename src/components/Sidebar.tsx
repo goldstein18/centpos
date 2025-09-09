@@ -26,10 +26,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
       <div className="p-6 border-b border-secondary-200">
         <div className="flex items-center space-x-3">
           <div className="h-10 w-10">
-            <img src="/logo.png" alt="CENTAdmin Logo" className="h-10 w-10 rounded-lg" />
+            <img src="/logo.png" alt="CENTPOS Logo" className="h-10 w-10 rounded-lg" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-secondary-900">CENTAdmin</h1>
+            <h1 className="text-xl font-bold text-secondary-900">CENTPOS</h1>
             <p className="text-sm text-secondary-500">Sistema de Abonos</p>
           </div>
         </div>
@@ -66,7 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
           </div>
           <div className="flex-1">
             <p className="text-sm font-medium text-secondary-900">Usuario Admin</p>
-            <p className="text-xs text-secondary-500">admin@centadmin.com</p>
+            <p className="text-xs text-secondary-500">admin@centpos.com</p>
           </div>
           <button className="p-1 text-secondary-400 hover:text-secondary-600">
             <Bell className="h-4 w-4" />

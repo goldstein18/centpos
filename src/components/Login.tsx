@@ -42,10 +42,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="mx-auto h-16 w-16 mb-4">
-            <img src="/logo.png" alt="CENTAdmin Logo" className="h-16 w-16 rounded-full" />
+            <img src="/logo.png" alt="CENTPOS Logo" className="h-16 w-16 rounded-full" />
           </div>
           <h2 className="text-3xl font-bold text-secondary-900 mb-2">
-            CENTAdmin Dashboard
+            CENTPOS Dashboard
           </h2>
           <p className="text-secondary-600">
             Inicia sesión en tu sistema de punto de venta

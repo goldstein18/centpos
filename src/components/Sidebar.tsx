@@ -6,7 +6,7 @@ import {
   FileText,
   Bell,
   Building2,
-  HeadphonesIcon
+  DollarSign
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -17,10 +17,9 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => {
   const navigationItems = [
     { id: 'abonos', label: 'Abonos', icon: CreditCard },
+    { id: 'pagos', label: 'Pagos', icon: DollarSign },
     { id: 'reportes', label: 'Reportes', icon: FileText },
     { id: 'gestion', label: 'Catálogo', icon: Building2 },
-    { id: 'clientes', label: 'Gestión de Clientes', icon: User },
-    { id: 'atencion', label: 'Atención a Clientes', icon: HeadphonesIcon },
   ];
 
   return (

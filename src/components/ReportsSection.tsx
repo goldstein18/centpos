@@ -9,7 +9,7 @@ const ReportsSection: React.FC = () => {
     fechaFin: ''
   });
   const [isDownloading, setIsDownloading] = useState(false);
-  const [downloadType, setDownloadType] = useState<'with-phone' | 'without-phone'>('with-phone');
+  const [downloadType, setDownloadType] = useState<'without-phone'>('without-phone');
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -29,14 +29,12 @@ const ReportsSection: React.FC = () => {
     return params.toString();
   };
 
-  const downloadReport = async (type: 'with-phone' | 'without-phone') => {
+  const downloadReport = async (type: 'without-phone') => {
     setIsDownloading(true);
     setDownloadType(type);
     
     try {
-      const endpoint = type === 'with-phone' 
-        ? 'https://centback-production.up.railway.app/abonos/reporte/csv'
-        : 'https://centback-production.up.railway.app/abonos/reporte/csv-sin-telefono';
+      const endpoint = 'https://centback-production.up.railway.app/abonos/reporte/csv-sin-telefono';
       
       const queryString = buildQueryString();
       const url = queryString ? `${endpoint}?${queryString}` : endpoint;
@@ -84,7 +82,7 @@ const ReportsSection: React.FC = () => {
         const downloadUrl = window.URL.createObjectURL(newBlob);
         const link = document.createElement('a');
         link.href = downloadUrl;
-        link.download = `reporte-abonos-${type === 'with-phone' ? 'con-telefono' : 'sin-telefono'}-${new Date().toISOString().split('T')[0]}.csv`;
+        link.download = `reporte-abonos-sin-telefono-${new Date().toISOString().split('T')[0]}.csv`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -246,55 +244,8 @@ const ReportsSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Download Options */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Report with Phone Numbers */}
-        <div className="card p-6">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="h-12 w-12 bg-green-50 rounded-lg flex items-center justify-center">
-              <FileText className="h-6 w-6 text-green-600" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-secondary-900">Reporte con Teléfonos</h3>
-              <p className="text-sm text-secondary-500">Incluye números de teléfono en el reporte</p>
-            </div>
-          </div>
-
-          <div className="space-y-3 mb-4">
-            <div className="text-sm text-secondary-600">
-              <p className="font-medium mb-2">Columnas incluidas:</p>
-              <ul className="space-y-1 text-xs">
-                <li>• Teléfono</li>
-                <li>• Monto</li>
-                <li>• Tipo</li>
-                <li>• Autorización</li>
-                <li>• Sucursal</li>
-                <li>• Usuario</li>
-                <li>• Fecha (México)</li>
-              </ul>
-            </div>
-          </div>
-
-          <button
-            onClick={() => downloadReport('with-phone')}
-            disabled={isDownloading}
-            className="btn-primary w-full flex justify-center items-center"
-          >
-            {isDownloading && downloadType === 'with-phone' ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Descargando...
-              </>
-            ) : (
-              <>
-                <Download className="h-4 w-4 mr-2" />
-                Descargar CSV con Teléfonos
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Report without Phone Numbers */}
+      {/* Download Option */}
+      <div className="max-w-md mx-auto">
         <div className="card p-6">
           <div className="flex items-center space-x-3 mb-4">
             <div className="h-12 w-12 bg-blue-50 rounded-lg flex items-center justify-center">

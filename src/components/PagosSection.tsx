@@ -39,6 +39,24 @@ const PagosSection: React.FC = () => {
     }).format(decimalValue);
   };
 
+  const formatAmountInput = (value: string) => {
+    // Remove any non-numeric characters
+    const numericValue = value.replace(/\D/g, '');
+    
+    if (numericValue === '') return '';
+    
+    // Convert to decimal (divide by 100)
+    const decimalValue = parseInt(numericValue) / 100;
+    
+    // Format as currency for input display
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(decimalValue);
+  };
+
   const handlePhoneSubmit = () => {
     if (!phoneNumber.trim() || !confirmPhone.trim()) {
       alert('Por favor completa ambos campos de teléfono');
@@ -176,7 +194,7 @@ const PagosSection: React.FC = () => {
         <div className="h-16 w-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
           <DollarSign className="h-8 w-8 text-green-600" />
         </div>
-        <h3 className="text-xl font-semibold text-secondary-900 mb-2">Monto a Abonar</h3>
+        <h3 className="text-xl font-semibold text-secondary-900 mb-2">Monto a Pagar</h3>
         <p className="text-secondary-600">Ingresa el monto dos veces para confirmar</p>
       </div>
 
@@ -189,9 +207,13 @@ const PagosSection: React.FC = () => {
             <input
               type="text"
               className="input-field pl-10 pr-10"
-              placeholder="0.00"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              placeholder="$0.00"
+              value={formatAmountInput(amount)}
+              onChange={(e) => {
+                // Extract numeric value from formatted string
+                const numericValue = e.target.value.replace(/[^\d]/g, '');
+                setAmount(numericValue);
+              }}
             />
             <button
               onClick={() => setShowAmount(!showAmount)}
@@ -212,9 +234,13 @@ const PagosSection: React.FC = () => {
             <input
               type="text"
               className="input-field pl-10"
-              placeholder="0.00"
-              value={confirmAmount}
-              onChange={(e) => setConfirmAmount(e.target.value)}
+              placeholder="$0.00"
+              value={formatAmountInput(confirmAmount)}
+              onChange={(e) => {
+                // Extract numeric value from formatted string
+                const numericValue = e.target.value.replace(/[^\d]/g, '');
+                setConfirmAmount(numericValue);
+              }}
             />
           </div>
         </div>

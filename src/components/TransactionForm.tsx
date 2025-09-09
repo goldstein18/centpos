@@ -148,26 +148,26 @@ const TransactionForm: React.FC = () => {
   };
 
   return (
-    <div className="card p-6">
-      <div className="flex items-center space-x-3 mb-6">
-        <div className="h-10 w-10 bg-[#f0fdfd] rounded-lg flex items-center justify-center">
-          <CreditCard className="h-5 w-5 text-[#3bbcc8]" />
+    <div className="card p-4 sm:p-6">
+      <div className="flex items-center space-x-3 mb-4 sm:mb-6">
+        <div className="h-8 w-8 sm:h-10 sm:w-10 bg-[#f0fdfd] rounded-lg flex items-center justify-center">
+          <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-[#3bbcc8]" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-secondary-900">Registrar Abono</h2>
-          <p className="text-sm text-secondary-500">Registra un nuevo abono al sistema</p>
+          <h2 className="text-lg sm:text-xl font-semibold text-secondary-900">Registrar Abono</h2>
+          <p className="text-xs sm:text-sm text-secondary-500">Registra un nuevo abono al sistema</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Número de Teléfono */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-secondary-900 flex items-center space-x-2">
-            <Phone className="h-5 w-5 text-[#3bbcc8]" />
+        <div className="space-y-3 sm:space-y-4">
+          <h3 className="text-base sm:text-lg font-medium text-secondary-900 flex items-center space-x-2">
+            <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-[#3bbcc8]" />
             <span>Número de Teléfono</span>
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-2">
                 Número de Teléfono *
@@ -209,13 +209,13 @@ const TransactionForm: React.FC = () => {
         </div>
 
         {/* Monto a Abonar */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-secondary-900 flex items-center space-x-2">
-            <DollarSign className="h-5 w-5 text-[#3bbcc8]" />
+        <div className="space-y-3 sm:space-y-4">
+          <h3 className="text-base sm:text-lg font-medium text-secondary-900 flex items-center space-x-2">
+            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-[#3bbcc8]" />
             <span>Monto a Abonar</span>
           </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-2">
                 Monto ($) *
@@ -276,11 +276,11 @@ const TransactionForm: React.FC = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex space-x-4 pt-4">
+        <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
           <button
             type="submit"
             disabled={isProcessing}
-            className="btn-primary flex-1 flex justify-center items-center"
+            className="btn-primary flex-1 flex justify-center items-center text-sm sm:text-base py-2 sm:py-3"
           >
             {isProcessing ? (
               <>
@@ -294,7 +294,7 @@ const TransactionForm: React.FC = () => {
           
           <button
             type="button"
-            className="btn-secondary flex-1"
+            className="btn-secondary flex-1 text-sm sm:text-base py-2 sm:py-3"
             onClick={clearForm}
           >
             Limpiar Formulario

@@ -38,22 +38,22 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-100 p-4">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-100 p-3 sm:p-4 lg:p-6">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8">
         <div className="text-center">
           <div className="mx-auto h-16 w-16 mb-4">
             <img src="/logo.png" alt="CENTPOS Logo" className="h-16 w-16 rounded-full" />
           </div>
-          <h2 className="text-3xl font-bold text-secondary-900 mb-2">
+          <h2 className="text-2xl sm:text-3xl font-bold text-secondary-900 mb-2">
             CENTPOS Dashboard
           </h2>
-          <p className="text-secondary-600">
+          <p className="text-sm sm:text-base text-secondary-600">
             Inicia sesión en tu sistema de punto de venta
           </p>
         </div>
 
-        <div className="card p-8">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+        <div className="card p-4 sm:p-6 lg:p-8">
+          <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
                 {error}
@@ -118,7 +118,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <button
               type="submit"
               disabled={isLoading}
-              className="btn-primary w-full flex justify-center items-center"
+              className="btn-primary w-full flex justify-center items-center text-sm sm:text-base py-2 sm:py-3"
             >
               {isLoading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>

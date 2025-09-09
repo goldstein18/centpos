@@ -134,13 +134,13 @@ const PagosSection: React.FC = () => {
   };
 
   const renderPhoneStep = () => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="text-center">
-        <div className="h-16 w-16 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Phone className="h-8 w-8 text-primary-600" />
+        <div className="h-12 w-12 sm:h-16 sm:w-16 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+          <Phone className="h-6 w-6 sm:h-8 sm:w-8 text-primary-600" />
         </div>
-        <h3 className="text-xl font-semibold text-secondary-900 mb-2">Verificación de Teléfono</h3>
-        <p className="text-secondary-600">Ingresa el número de teléfono del cliente dos veces para confirmar</p>
+        <h3 className="text-lg sm:text-xl font-semibold text-secondary-900 mb-2">Verificación de Teléfono</h3>
+        <p className="text-sm sm:text-base text-secondary-600">Ingresa el número de teléfono del cliente dos veces para confirmar</p>
       </div>
 
       <div className="space-y-4">
@@ -179,7 +179,7 @@ const PagosSection: React.FC = () => {
         <button
           onClick={handlePhoneSubmit}
           disabled={!phoneNumber || !confirmPhone}
-          className="btn-primary flex items-center space-x-2"
+          className="btn-primary flex items-center space-x-2 text-sm sm:text-base py-2 sm:py-3 px-4 sm:px-6"
         >
           <CheckCircle className="h-4 w-4" />
           <span>Continuar</span>
@@ -381,23 +381,23 @@ const PagosSection: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="card p-6">
+      <div className="card p-4 sm:p-6">
         <div className="flex items-center space-x-3">
-          <div className="h-10 w-10 bg-primary-50 rounded-lg flex items-center justify-center">
-            <DollarSign className="h-5 w-5 text-primary-600" />
+          <div className="h-8 w-8 sm:h-10 sm:w-10 bg-primary-50 rounded-lg flex items-center justify-center">
+            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-secondary-900">Pagos</h2>
-            <p className="text-sm text-secondary-500">Transferencias y pagos en sucursal</p>
+            <h2 className="text-lg sm:text-xl font-semibold text-secondary-900">Pagos</h2>
+            <p className="text-xs sm:text-sm text-secondary-500">Transferencias y pagos en sucursal</p>
           </div>
         </div>
       </div>
 
       {/* Progress Steps */}
-      <div className="card p-6">
-        <div className="flex items-center justify-center space-x-4">
+      <div className="card p-4 sm:p-6">
+        <div className="flex items-center justify-center space-x-2 sm:space-x-4">
           <div className={`flex items-center space-x-2 ${step === 'phone' ? 'text-primary-600' : step === 'amount' || step === 'otp' || step === 'success' ? 'text-green-600' : 'text-secondary-400'}`}>
             <div className={`h-8 w-8 rounded-full flex items-center justify-center ${step === 'phone' ? 'bg-primary-100' : step === 'amount' || step === 'otp' || step === 'success' ? 'bg-green-100' : 'bg-secondary-100'}`}>
               <Phone className="h-4 w-4" />
@@ -405,7 +405,7 @@ const PagosSection: React.FC = () => {
             <span className="text-sm font-medium">Teléfono</span>
           </div>
           
-          <div className={`h-1 w-16 ${step === 'amount' || step === 'otp' || step === 'success' ? 'bg-green-500' : 'bg-secondary-200'}`}></div>
+          <div className={`h-1 w-8 sm:w-16 ${step === 'amount' || step === 'otp' || step === 'success' ? 'bg-green-500' : 'bg-secondary-200'}`}></div>
           
           <div className={`flex items-center space-x-2 ${step === 'amount' ? 'text-primary-600' : step === 'otp' || step === 'success' ? 'text-green-600' : 'text-secondary-400'}`}>
             <div className={`h-8 w-8 rounded-full flex items-center justify-center ${step === 'amount' ? 'bg-primary-100' : step === 'otp' || step === 'success' ? 'bg-green-100' : 'bg-secondary-100'}`}>
@@ -414,7 +414,7 @@ const PagosSection: React.FC = () => {
             <span className="text-sm font-medium">Monto</span>
           </div>
           
-          <div className={`h-1 w-16 ${step === 'otp' || step === 'success' ? 'bg-green-500' : 'bg-secondary-200'}`}></div>
+          <div className={`h-1 w-8 sm:w-16 ${step === 'otp' || step === 'success' ? 'bg-green-500' : 'bg-secondary-200'}`}></div>
           
           <div className={`flex items-center space-x-2 ${step === 'otp' ? 'text-primary-600' : step === 'success' ? 'text-green-600' : 'text-secondary-400'}`}>
             <div className={`h-8 w-8 rounded-full flex items-center justify-center ${step === 'otp' ? 'bg-primary-100' : step === 'success' ? 'bg-green-100' : 'bg-secondary-100'}`}>
@@ -426,7 +426,7 @@ const PagosSection: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="card p-6">
+      <div className="card p-4 sm:p-6">
         {step === 'phone' && renderPhoneStep()}
         {step === 'amount' && renderAmountStep()}
         {step === 'otp' && renderOtpStep()}

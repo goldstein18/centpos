@@ -116,28 +116,28 @@ const ReportsSection: React.FC = () => {
 
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="card p-6">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="h-10 w-10 bg-primary-50 rounded-lg flex items-center justify-center">
-            <FileText className="h-5 w-5 text-primary-600" />
+      <div className="card p-4 sm:p-6">
+        <div className="flex items-center space-x-3 mb-3 sm:mb-4">
+          <div className="h-8 w-8 sm:h-10 sm:w-10 bg-primary-50 rounded-lg flex items-center justify-center">
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-secondary-900">Reportes de Abonos</h2>
-            <p className="text-sm text-secondary-500">Descarga reportes CSV de abonos registrados</p>
+            <h2 className="text-lg sm:text-xl font-semibold text-secondary-900">Reportes de Abonos</h2>
+            <p className="text-xs sm:text-sm text-secondary-500">Descarga reportes CSV de abonos registrados</p>
           </div>
         </div>
       </div>
 
       {/* Filters Section */}
-      <div className="card p-6">
-        <div className="flex items-center space-x-2 mb-4">
-          <Filter className="h-5 w-5 text-primary-600" />
-          <h3 className="text-lg font-medium text-secondary-900">Filtros de Reporte</h3>
+      <div className="card p-4 sm:p-6">
+        <div className="flex items-center space-x-2 mb-3 sm:mb-4">
+          <Filter className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
+          <h3 className="text-base sm:text-lg font-medium text-secondary-900">Filtros de Reporte</h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {/* Sucursal Filter */}
           <div>
             <label className="block text-sm font-medium text-secondary-700 mb-2">
@@ -214,7 +214,7 @@ const ReportsSection: React.FC = () => {
         </div>
 
         {/* Filter Actions */}
-        <div className="flex justify-between items-center mt-4 pt-4 border-t border-secondary-200">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 pt-4 border-t border-secondary-200 space-y-3 sm:space-y-0">
           <div className="text-sm text-secondary-600">
             {hasActiveFilters && (
               <span className="flex items-center">
@@ -223,37 +223,27 @@ const ReportsSection: React.FC = () => {
               </span>
             )}
           </div>
-          <div className="flex justify-between items-center mt-4 pt-4 border-t border-secondary-200">
-            <div className="text-sm text-secondary-600">
-              {hasActiveFilters && (
-                <span className="flex items-center">
-                  <Filter className="h-4 w-4 mr-1" />
-                  Filtros activos
-                </span>
-              )}
-            </div>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={clearFilters}
-              disabled={!hasActiveFilters}
-            >
-              Limpiar Filtros
-            </button>
-          </div>
+          <button
+            type="button"
+            className="btn-secondary text-sm sm:text-base py-2 sm:py-3 px-4 sm:px-6"
+            onClick={clearFilters}
+            disabled={!hasActiveFilters}
+          >
+            Limpiar Filtros
+          </button>
         </div>
       </div>
 
       {/* Download Option */}
       <div className="max-w-md mx-auto">
-        <div className="card p-6">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="h-12 w-12 bg-blue-50 rounded-lg flex items-center justify-center">
-              <FileText className="h-6 w-6 text-blue-600" />
+        <div className="card p-4 sm:p-6">
+          <div className="flex items-center space-x-3 mb-3 sm:mb-4">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 bg-blue-50 rounded-lg flex items-center justify-center">
+              <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-secondary-900">Reporte sin Teléfonos</h3>
-              <p className="text-sm text-secondary-500">Reporte anonimizado sin números de teléfono</p>
+              <h3 className="text-base sm:text-lg font-semibold text-secondary-900">Reporte sin Teléfonos</h3>
+              <p className="text-xs sm:text-sm text-secondary-500">Reporte anonimizado sin números de teléfono</p>
             </div>
           </div>
 
@@ -274,7 +264,7 @@ const ReportsSection: React.FC = () => {
           <button
             onClick={() => downloadReport('without-phone')}
             disabled={isDownloading}
-            className="btn-primary w-full flex justify-center items-center"
+            className="btn-primary w-full flex justify-center items-center text-sm sm:text-base py-2 sm:py-3"
           >
             {isDownloading && downloadType === 'without-phone' ? (
               <>
@@ -292,10 +282,10 @@ const ReportsSection: React.FC = () => {
       </div>
 
       {/* Information Section */}
-      <div className="card p-6">
-        <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
-          <h4 className="text-sm font-medium text-primary-800 mb-2">💡 Información sobre los Reportes</h4>
-          <ul className="text-sm text-primary-700 space-y-1">
+      <div className="card p-4 sm:p-6">
+        <div className="bg-primary-50 border border-primary-200 rounded-lg p-3 sm:p-4">
+          <h4 className="text-xs sm:text-sm font-medium text-primary-800 mb-2">💡 Información sobre los Reportes</h4>
+          <ul className="text-xs sm:text-sm text-primary-700 space-y-1">
             <li>• Los reportes se descargan en formato CSV</li>
             <li>• Sucursal y Usuario están fijos en "prueba" para desarrollo</li>
             <li>• Solo las fechas son filtros opcionales</li>

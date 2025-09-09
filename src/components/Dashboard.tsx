@@ -6,6 +6,7 @@ import ReportsSection from './ReportsSection';
 
 const Dashboard: React.FC = () => {
   const [activeSection, setActiveSection] = useState('abonos');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const renderContent = () => {
     switch (activeSection) {
@@ -20,11 +21,20 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   return (
     <div className="flex h-screen bg-secondary-50">
-      <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-      <div className="flex-1 overflow-auto">
-        <div className="p-6">
+      <Sidebar 
+        activeSection={activeSection} 
+        onSectionChange={setActiveSection}
+        isMobileMenuOpen={isMobileMenuOpen}
+        onMobileMenuToggle={toggleMobileMenu}
+      />
+      <div className="flex-1 overflow-auto lg:ml-0">
+        <div className="p-3 sm:p-4 lg:p-6 pt-16 lg:pt-6">
           {renderContent()}
         </div>
       </div>

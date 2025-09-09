@@ -5,7 +5,6 @@ import {
   User,
   FileText,
   Bell,
-  Building2,
   DollarSign
 } from 'lucide-react';
 
@@ -19,7 +18,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange }) => 
     { id: 'abonos', label: 'Abonos', icon: CreditCard },
     { id: 'pagos', label: 'Pagos', icon: DollarSign },
     { id: 'reportes', label: 'Reportes', icon: FileText },
-    { id: 'gestion', label: 'Catálogo', icon: Building2 },
   ];
 
   return (

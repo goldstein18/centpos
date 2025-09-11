@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 const CancelarAbonosSection: React.FC = () => {
-  const [operation, setOperation] = useState<'cancel' | 'status'>('cancel');
+  const [operation, setOperation] = useState<'cancel-pago' | 'cancel-abono' | 'status'>('cancel-pago');
   const [step, setStep] = useState<'phone' | 'authorization' | 'result'>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [confirmPhone, setConfirmPhone] = useState('');
@@ -59,9 +59,11 @@ const CancelarAbonosSection: React.FC = () => {
         authorization: authorizationNumber,
         amount: '$150.0',
         date: new Date().toLocaleDateString('es-MX'),
-        status: operation === 'cancel' ? 'CANCELADO' : 'EXITOSO',
-        message: operation === 'cancel' 
+        status: operation === 'cancel-pago' ? 'PAGO CANCELADO' : operation === 'cancel-abono' ? 'ABONO CANCELADO' : 'EXITOSO',
+        message: operation === 'cancel-pago' 
           ? 'El pago ha sido cancelado exitosamente'
+          : operation === 'cancel-abono'
+          ? 'El abono ha sido cancelado exitosamente'
           : 'El abono se encuentra en estado exitoso'
       };
       
@@ -91,7 +93,7 @@ const CancelarAbonosSection: React.FC = () => {
         </div>
         <h3 className="text-xl font-semibold text-secondary-900 mb-2">Verificación de Teléfono</h3>
         <p className="text-secondary-600">
-          Ingresa el número de teléfono al que se hizo el {operation === 'cancel' ? 'pago' : 'abono'} dos veces para confirmar
+          Ingresa el número de teléfono al que se hizo el {operation === 'cancel-pago' ? 'pago' : operation === 'cancel-abono' ? 'abono' : 'abono'} dos veces para confirmar
         </p>
       </div>
 
@@ -148,7 +150,7 @@ const CancelarAbonosSection: React.FC = () => {
         </div>
         <h3 className="text-xl font-semibold text-secondary-900 mb-2">Número de Autorización</h3>
         <p className="text-secondary-600">
-          Ingresa el número de autorización de la {operation === 'cancel' ? 'operación de pago' : 'operación de abono'}
+          Ingresa el número de autorización de la {operation === 'cancel-pago' ? 'operación de pago' : operation === 'cancel-abono' ? 'operación de abono' : 'operación de abono'}
         </p>
       </div>
 
@@ -166,7 +168,7 @@ const CancelarAbonosSection: React.FC = () => {
             />
           </div>
           <p className="text-xs text-secondary-500 mt-1">
-            Este número fue proporcionado al momento de la {operation === 'cancel' ? 'operación de pago' : 'operación de abono'}
+            Este número fue proporcionado al momento de la {operation === 'cancel-pago' ? 'operación de pago' : operation === 'cancel-abono' ? 'operación de abono' : 'operación de abono'}
           </p>
         </div>
 
@@ -176,8 +178,10 @@ const CancelarAbonosSection: React.FC = () => {
             <div>
               <h4 className="text-sm font-medium text-blue-800 mb-1">Información importante</h4>
               <p className="text-sm text-blue-700">
-                {operation === 'cancel' 
+                {operation === 'cancel-pago' 
                   ? 'Al cancelar un pago, la operación será revertida y el monto será devuelto al cliente.'
+                  : operation === 'cancel-abono'
+                  ? 'Al cancelar un abono, la operación será revertida y el monto será devuelto al cliente.'
                   : 'El estatus te permitirá verificar si la operación fue procesada correctamente.'
                 }
               </p>
@@ -204,12 +208,12 @@ const CancelarAbonosSection: React.FC = () => {
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               <span>Procesando...</span>
             </>
-          ) : (
-            <>
-              {operation === 'cancel' ? <Ban className="h-4 w-4" /> : <Search className="h-4 w-4" />}
-              <span>{operation === 'cancel' ? 'Cancelar Pago' : 'Verificar Estatus'}</span>
-            </>
-          )}
+            ) : (
+              <>
+                {operation === 'cancel-pago' ? <Ban className="h-4 w-4" /> : operation === 'cancel-abono' ? <Ban className="h-4 w-4" /> : <Search className="h-4 w-4" />}
+                <span>{operation === 'cancel-pago' ? 'Cancelar Pago' : operation === 'cancel-abono' ? 'Cancelar Abono' : 'Verificar Estatus'}</span>
+              </>
+            )}
         </button>
       </div>
     </div>
@@ -267,8 +271,8 @@ const CancelarAbonosSection: React.FC = () => {
           onClick={handleReset}
           className="btn-primary flex items-center space-x-2"
         >
-          {operation === 'cancel' ? <Ban className="h-4 w-4" /> : <Search className="h-4 w-4" />}
-          <span>Nueva {operation === 'cancel' ? 'Cancelación' : 'Consulta'}</span>
+          {operation === 'cancel-pago' ? <Ban className="h-4 w-4" /> : operation === 'cancel-abono' ? <Ban className="h-4 w-4" /> : <Search className="h-4 w-4" />}
+          <span>Nueva {operation === 'cancel-pago' ? 'Cancelación de Pago' : operation === 'cancel-abono' ? 'Cancelación de Abono' : 'Consulta'}</span>
         </button>
       </div>
     </div>
@@ -292,11 +296,11 @@ const CancelarAbonosSection: React.FC = () => {
       {/* Operation Selection */}
       <div className="card p-4 sm:p-6">
         <h3 className="text-base sm:text-lg font-medium text-secondary-900 mb-4">Selecciona una operación</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <button
-            onClick={() => setOperation('cancel')}
+            onClick={() => setOperation('cancel-pago')}
             className={`p-4 rounded-lg border-2 transition-all duration-200 ${
-              operation === 'cancel'
+              operation === 'cancel-pago'
                 ? 'border-red-500 bg-red-50 text-red-700'
                 : 'border-secondary-200 bg-white text-secondary-700 hover:border-red-300 hover:bg-red-25'
             }`}
@@ -306,6 +310,23 @@ const CancelarAbonosSection: React.FC = () => {
               <div className="text-left">
                 <h4 className="font-semibold">Cancelar Pago</h4>
                 <p className="text-sm opacity-75">Cancelar un pago realizado</p>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setOperation('cancel-abono')}
+            className={`p-4 rounded-lg border-2 transition-all duration-200 ${
+              operation === 'cancel-abono'
+                ? 'border-red-500 bg-red-50 text-red-700'
+                : 'border-secondary-200 bg-white text-secondary-700 hover:border-red-300 hover:bg-red-25'
+            }`}
+          >
+            <div className="flex items-center space-x-3">
+              <Ban className="h-6 w-6" />
+              <div className="text-left">
+                <h4 className="font-semibold">Cancelar Abono</h4>
+                <p className="text-sm opacity-75">Cancelar un abono realizado</p>
               </div>
             </div>
           </button>

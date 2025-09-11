@@ -45,6 +45,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <img src="/logo.png" alt="CENTPOS Logo" className="h-16 w-16 rounded-full" />
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-secondary-900 mb-2">
+            
             CENTPOS Dashboard
           </h2>
           <p className="text-sm sm:text-base text-secondary-600">

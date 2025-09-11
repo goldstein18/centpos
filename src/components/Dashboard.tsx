@@ -3,6 +3,7 @@ import Sidebar from './Sidebar';
 import TransactionForm from './TransactionForm';
 import PagosSection from './PagosSection';
 import ReportsSection from './ReportsSection';
+import CancelarAbonosSection from './CancelarAbonosSection';
 
 const Dashboard: React.FC = () => {
   const [activeSection, setActiveSection] = useState('abonos');
@@ -14,6 +15,8 @@ const Dashboard: React.FC = () => {
         return <TransactionForm />;
       case 'pagos':
         return <PagosSection />;
+      case 'cancelar':
+        return <CancelarAbonosSection />;
       case 'reportes':
         return <ReportsSection />;
       default:

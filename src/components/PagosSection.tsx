@@ -20,6 +20,7 @@ const PagosSection: React.FC = () => {
   const [otpCode, setOtpCode] = useState('');
   const [showAmount, setShowAmount] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [transactionNumber, setTransactionNumber] = useState('');
 
   const formatAmount = (value: string) => {
     // Remove any non-numeric characters
@@ -116,6 +117,11 @@ const PagosSection: React.FC = () => {
     
     // Simulate OTP verification
     if (otpCode === '123456') {
+      // Generate transaction number
+      const timestamp = Date.now().toString().slice(-6);
+      const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      const generatedTransactionNumber = `TXN${timestamp}${randomNum}`;
+      setTransactionNumber(generatedTransactionNumber);
       setStep('success');
     } else {
       alert('Código OTP incorrecto. Intenta nuevamente.');
@@ -131,6 +137,7 @@ const PagosSection: React.FC = () => {
     setOtpCode('');
     setShowAmount(false);
     setIsProcessing(false);
+    setTransactionNumber('');
   };
 
   const renderPhoneStep = () => (
@@ -364,6 +371,10 @@ const PagosSection: React.FC = () => {
 
       <div className="card p-6">
         <div className="space-y-4">
+          <div className="flex justify-between">
+            <span className="text-secondary-600">Número de Transacción:</span>
+            <span className="font-medium text-primary-600">{transactionNumber}</span>
+          </div>
           <div className="flex justify-between">
             <span className="text-secondary-600">Teléfono:</span>
             <span className="font-medium">{phoneNumber}</span>

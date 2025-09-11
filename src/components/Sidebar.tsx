@@ -7,7 +7,8 @@ import {
   Bell,
   DollarSign,
   Menu,
-  X
+  X,
+  Ban
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -21,6 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isMob
   const navigationItems = [
     { id: 'abonos', label: 'Abonos', icon: CreditCard },
     { id: 'pagos', label: 'Pagos', icon: DollarSign },
+    { id: 'cancelar', label: 'Cancelar Abonos', icon: Ban },
     { id: 'reportes', label: 'Reportes', icon: FileText },
   ];
 

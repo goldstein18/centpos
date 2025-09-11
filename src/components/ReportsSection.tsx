@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Download, FileText, Calendar, Building, User, Filter } from 'lucide-react';
+import { Download, FileText, Calendar, Building, Filter } from 'lucide-react';
 
 const ReportsSection: React.FC = () => {
   const [filters, setFilters] = useState({
     sucursal: 'prueba',
-    usuario: 'prueba',
     fechaInicio: '',
     fechaFin: ''
   });
@@ -105,7 +104,6 @@ const ReportsSection: React.FC = () => {
   const clearFilters = () => {
     setFilters({
       sucursal: 'prueba',
-      usuario: 'prueba',
       fechaInicio: '',
       fechaFin: ''
     });
@@ -137,7 +135,7 @@ const ReportsSection: React.FC = () => {
           <h3 className="text-base sm:text-lg font-medium text-secondary-900">Filtros de Reporte</h3>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {/* Sucursal Filter */}
           <div>
             <label className="block text-sm font-medium text-secondary-700 mb-2">
@@ -150,28 +148,6 @@ const ReportsSection: React.FC = () => {
                 name="sucursal"
                 className="input-field bg-secondary-100 cursor-not-allowed"
                 value={filters.sucursal}
-                disabled
-                readOnly
-              />
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <span className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded-full">Fijo</span>
-              </div>
-            </div>
-            <p className="text-xs text-secondary-500 mt-1">Valor fijo para pruebas</p>
-          </div>
-
-          {/* Usuario Filter */}
-          <div>
-            <label className="block text-sm font-medium text-secondary-700 mb-2">
-              <User className="h-4 w-4 inline mr-1" />
-              Usuario
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                name="usuario"
-                className="input-field bg-secondary-100 cursor-not-allowed"
-                value={filters.usuario}
                 disabled
                 readOnly
               />

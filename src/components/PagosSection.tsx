@@ -27,15 +27,15 @@ const PagosSection: React.FC = () => {
     
     if (numericValue === '') return '';
     
-    // Convert to decimal (divide by 100)
-    const decimalValue = parseInt(numericValue) / 100;
+    // Convert to decimal (divide by 10)
+    const decimalValue = parseInt(numericValue) / 10;
     
     // Format as currency
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
       currency: 'MXN',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
     }).format(decimalValue);
   };
 
@@ -45,15 +45,15 @@ const PagosSection: React.FC = () => {
     
     if (numericValue === '') return '';
     
-    // Convert to decimal (divide by 100)
-    const decimalValue = parseInt(numericValue) / 100;
+    // Convert to decimal (divide by 10)
+    const decimalValue = parseInt(numericValue) / 10;
     
     // Format as currency for input display
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
       currency: 'MXN',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
     }).format(decimalValue);
   };
 
@@ -223,7 +223,7 @@ const PagosSection: React.FC = () => {
             </button>
           </div>
           <p className="text-xs text-secondary-500 mt-1">
-            Ejemplo: Para $10.00 ingresa 1000, para $1.50 ingresa 150
+            Ejemplo: Para $10.0 ingresa 100, para $1.5 ingresa 15
           </p>
         </div>
 
@@ -255,6 +255,17 @@ const PagosSection: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Información del Sistema */}
+        <div className="bg-[#f0fdfd] border border-[#3bbcc8] rounded-lg p-4">
+          <h4 className="text-sm font-medium text-[#0d9488] mb-2">💡 Información del Sistema</h4>
+          <ul className="text-sm text-[#0d9488] space-y-1">
+            <li>• El monto se formatea automáticamente en el campo</li>
+            <li>• Para pagar $10.0, introduce: 100</li>
+            <li>• Para pagar $1.5, introduce: 15</li>
+            <li>• Para pagar $0.5, introduce: 5</li>
+          </ul>
+        </div>
       </div>
 
       <div className="flex justify-between">

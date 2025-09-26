@@ -8,7 +8,9 @@ import {
   DollarSign,
   Menu,
   X,
-  Ban
+  Ban,
+  Shield,
+  Percent
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -23,6 +25,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isMob
     { id: 'abonos', label: 'Abonos', icon: CreditCard },
     { id: 'pagos', label: 'Pagos', icon: DollarSign },
     { id: 'cancelar', label: 'Cancelar Abonos', icon: Ban },
+    { id: 'seguros', label: 'Seguros', icon: Shield },
+    { id: 'tasas', label: 'Tasas de Interés', icon: Percent },
     { id: 'reportes', label: 'Reportes', icon: FileText },
   ];
 

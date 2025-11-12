@@ -88,13 +88,15 @@ const TransactionForm: React.FC = () => {
         montoConfirmacion: parseFloat(finalAmount)
       };
       
+      const endpoint = 'https://centdos-backend-production.up.railway.app/pos/abonos';
+
       console.log('Sending request to API:', {
-        url: 'https://centback-production.up.railway.app/abonos',
+        url: endpoint,
         method: 'POST',
         body: requestBody
       });
       
-      const response = await fetch('https://centback-production.up.railway.app/abonos', {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

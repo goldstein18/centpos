@@ -6,9 +6,7 @@ import {
   CheckCircle, 
   AlertTriangle,
   Search,
-  Ban,
-  Eye,
-  EyeOff
+  Ban
 } from 'lucide-react';
 
 const CancelarAbonosSection: React.FC = () => {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
+import { setAuthToken, clearAuthToken } from '../lib/auth';
 
 interface LoginProps {
   onLogin: (success: boolean) => void;
@@ -19,15 +20,62 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     setIsLoading(true);
     setError('');
 
-    // Simulate API call
-    setTimeout(() => {
-      if (formData.username === 'admin' && formData.password === 'password') {
-        onLogin(true);
-      } else {
-        setError('Credenciales inválidas. Intenta admin/password');
+    try {
+      clearAuthToken();
+
+      const baseUrl = process.env.REACT_APP_API_URL?.replace(/\/$/, '');
+      const endpoint = baseUrl
+        ? `${baseUrl}/admin/login`
+        : 'https://centdos-backend-production.up.railway.app/admin/login';
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password
+        })
+      });
+
+      const responseBody = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const message =
+          (responseBody && (responseBody.message || responseBody.error)) ||
+          'Credenciales inválidas. Verifica tu usuario y contraseña.';
+        setError(message);
+        return;
       }
+
+      const token =
+        responseBody?.token ??
+        responseBody?.access_token ??
+        responseBody?.admin_access_token ??
+        responseBody?.data?.token ??
+        null;
+
+      if (typeof token === 'string' && token.length > 0) {
+        setAuthToken(token);
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn('Inicio de sesión exitoso pero no se recibió token. Se confiará en las cookies del backend.');
+      }
+
+      onLogin(true);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Error iniciando sesión:', err);
+      setError(
+        err instanceof Error
+          ? `No se pudo iniciar sesión: ${err.message}`
+          : 'No se pudo iniciar sesión. Intenta de nuevo más tarde.'
+      );
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,11 +177,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-secondary-600">
-              Credenciales demo: admin / password
-            </p>
-          </div>
         </div>
       </div>
     </div>

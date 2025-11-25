@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CreditCard, Phone, DollarSign } from 'lucide-react';
+import { getAuthToken } from '../lib/auth';
 
 const TransactionForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -90,6 +91,15 @@ const TransactionForm: React.FC = () => {
       
       const endpoint = 'https://centdos-backend-production.up.railway.app/pos/abonos';
 
+      const token = getAuthToken();
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       console.log('Sending request to API:', {
         url: endpoint,
         method: 'POST',
@@ -98,9 +108,8 @@ const TransactionForm: React.FC = () => {
       
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
+        credentials: 'include',
         body: JSON.stringify(requestBody)
       });
 

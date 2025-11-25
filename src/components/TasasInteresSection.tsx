@@ -1,107 +1,161 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Percent, 
-  Save, 
-  Edit3, 
-  CheckCircle, 
+import {
+  Percent,
+  Save,
+  Edit3,
+  CheckCircle,
   AlertTriangle,
   TrendingUp
 } from 'lucide-react';
+import { getAuthToken } from '../lib/auth';
 
 interface InterestRate {
-  id: string;
   type: 'PRO' | 'Normal';
   rate: number;
   description: string;
-  isActive: boolean;
+  updatedAt?: string;
 }
 
+interface ApiRate {
+  type: 'PRO' | 'Normal';
+  interest_rate: number;
+  updated_at: string;
+}
+
+const DEFAULT_RATES: InterestRate[] = [
+  { type: 'PRO', rate: 12.5, description: 'Tasa PRO' },
+  { type: 'Normal', rate: 18.75, description: 'Tasa Normal' }
+];
+
 const TasasInteresSection: React.FC = () => {
-  const [rates, setRates] = useState<InterestRate[]>([]);
-  const [editingRate, setEditingRate] = useState<string | null>(null);
-  const [editValues, setEditValues] = useState<{ [key: string]: number }>({});
+  const [rates, setRates] = useState<InterestRate[]>(DEFAULT_RATES);
+  const [editingRate, setEditingRate] = useState<'PRO' | 'Normal' | null>(null);
+  const [editValues, setEditValues] = useState<{ [key: string]: number }>({
+    PRO: DEFAULT_RATES[0].rate,
+    Normal: DEFAULT_RATES[1].rate
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize with sample data
-  useEffect(() => {
-    const sampleRates: InterestRate[] = [
-      {
-        id: 'pro-rate',
-        type: 'PRO',
-        rate: 12.5,
-        description: 'Tasa PRO',
-        isActive: true
-      },
-      {
-        id: 'normal-rate',
-        type: 'Normal',
-        rate: 18.75,
-        description: 'Tasa Normal',
-        isActive: true
+  const baseUrl = process.env.REACT_APP_API_URL?.replace(/\/$/, '') ?? 'https://centdos-backend-production.up.railway.app';
+  const investmentEndpoint = `${baseUrl}/investment-rates`;
+
+  const getRateColor = (type: 'PRO' | 'Normal') => (type === 'PRO' ? 'text-green-600' : 'text-blue-600');
+  const getRateBgColor = (type: 'PRO' | 'Normal') =>
+    type === 'PRO' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200';
+
+  const fetchRates = async () => {
+    setIsLoading(true);
+    try {
+      const token = getAuthToken();
+      const headers: HeadersInit = {
+        Accept: 'application/json'
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
       }
-    ];
-    setRates(sampleRates);
+
+      const response = await fetch(investmentEndpoint, {
+        method: 'GET',
+        headers,
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('No se pudieron cargar las tasas');
+      }
+
+      const data = (await response.json()) as ApiRate[];
+      const parsed = data.map(row => ({
+        type: row.type,
+        rate: row.interest_rate,
+        description: row.type === 'PRO' ? 'Tasa PRO' : 'Tasa Normal',
+        updatedAt: row.updated_at
+      }));
+      setRates(parsed);
+      setEditValues({
+        PRO: parsed.find(r => r.type === 'PRO')?.rate ?? DEFAULT_RATES[0].rate,
+        Normal: parsed.find(r => r.type === 'Normal')?.rate ?? DEFAULT_RATES[1].rate
+      });
+    } catch (error) {
+      setSaveMessage({ type: 'error', message: (error as Error).message });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRates();
   }, []);
 
-  const handleEdit = (rateId: string, currentRate: number) => {
-    setEditingRate(rateId);
-    setEditValues({ ...editValues, [rateId]: currentRate });
+  const handleEdit = (rateType: 'PRO' | 'Normal', currentRate: number) => {
+    setEditingRate(rateType);
+    setEditValues({ ...editValues, [rateType]: currentRate });
   };
 
-  const handleCancel = (rateId: string) => {
+  const handleCancel = (rateType: 'PRO' | 'Normal') => {
     setEditingRate(null);
-    setEditValues({ ...editValues, [rateId]: rates.find(r => r.id === rateId)?.rate || 0 });
+    const currentRate = rates.find(rate => rate.type === rateType)?.rate ?? DEFAULT_RATES.find(r => r.type === rateType)!.rate;
+    setEditValues({ ...editValues, [rateType]: currentRate });
   };
 
-  const handleSave = async (rateId: string) => {
-    const newRate = editValues[rateId];
-    
+  const handleSave = async (rateType: 'PRO' | 'Normal') => {
+    const newRate = editValues[rateType];
+
     if (newRate < 0 || newRate > 100) {
       setSaveMessage({ type: 'error', message: 'La tasa de interés debe estar entre 0% y 100%' });
       return;
     }
 
     setIsSaving(true);
-    
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setRates(prevRates => 
-        prevRates.map(rate => 
-          rate.id === rateId 
-            ? { 
-                ...rate, 
-                rate: newRate
-              }
+      const token = getAuthToken();
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(investmentEndpoint, {
+        method: 'POST',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify({
+          type: rateType.toLowerCase(),
+          interestRate: newRate
+        })
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => ({}));
+        throw new Error(errorBody.message || 'No se pudo actualizar la tasa');
+      }
+
+      const saved = (await response.json()) as ApiRate;
+      const savedType = saved.type.toLowerCase() === 'pro' ? 'PRO' : 'Normal';
+      setRates(prev =>
+        prev.map(rate =>
+          rate.type === savedType
+            ? { ...rate, rate: saved.interest_rate, updatedAt: saved.updated_at }
             : rate
         )
       );
-      
       setEditingRate(null);
-      setSaveMessage({ type: 'success', message: 'Tasa de interés actualizada exitosamente' });
-      
-      // Clear message after 3 seconds
+      setSaveMessage({ type: 'success', message: 'Tasa actualizada correctamente' });
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (error) {
-      setSaveMessage({ type: 'error', message: 'Error al actualizar la tasa de interés' });
+      setSaveMessage({ type: 'error', message: (error as Error).message });
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleRateChange = (rateId: string, value: string) => {
+  const handleRateChange = (rateType: 'PRO' | 'Normal', value: string) => {
     const numericValue = parseFloat(value) || 0;
-    setEditValues({ ...editValues, [rateId]: numericValue });
-  };
-
-  const getRateColor = (type: 'PRO' | 'Normal') => {
-    return type === 'PRO' ? 'text-green-600' : 'text-blue-600';
-  };
-
-  const getRateBgColor = (type: 'PRO' | 'Normal') => {
-    return type === 'PRO' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200';
+    setEditValues({ ...editValues, [rateType]: numericValue });
   };
 
   return (
@@ -144,7 +198,7 @@ const TasasInteresSection: React.FC = () => {
       {/* Interest Rates Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {rates.map((rate) => (
-          <div key={rate.id} className={`card p-6 border-2 ${getRateBgColor(rate.type)}`}>
+          <div key={rate.type} className={`card p-6 border-2 ${getRateBgColor(rate.type)}`}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
@@ -156,14 +210,12 @@ const TasasInteresSection: React.FC = () => {
                   <h3 className={`text-lg font-semibold ${getRateColor(rate.type)}`}>
                     Tasa {rate.type}
                   </h3>
+                  {rate.updatedAt && (
+                    <p className="text-xs text-secondary-500">
+                      Actualizó: {new Date(rate.updatedAt).toLocaleDateString('es-MX')}
+                    </p>
+                  )}
                 </div>
-              </div>
-              <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                rate.isActive 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-gray-100 text-gray-800'
-              }`}>
-                {rate.isActive ? 'Activa' : 'Inactiva'}
               </div>
             </div>
 
@@ -172,7 +224,7 @@ const TasasInteresSection: React.FC = () => {
                 <label className="block text-sm font-medium text-secondary-700 mb-2">
                   Tasa de Interés Anual
                 </label>
-                {editingRate === rate.id ? (
+                {editingRate === rate.type ? (
                   <div className="flex items-center space-x-2">
                     <div className="relative flex-1">
                       <input
@@ -181,8 +233,8 @@ const TasasInteresSection: React.FC = () => {
                         min="0"
                         max="100"
                         className="input-field pr-8"
-                        value={editValues[rate.id] || ''}
-                        onChange={(e) => handleRateChange(rate.id, e.target.value)}
+                        value={editValues[rate.type] || ''}
+                        onChange={(e) => handleRateChange(rate.type, e.target.value)}
                         placeholder="0.00"
                       />
                       <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary-400">
@@ -190,7 +242,7 @@ const TasasInteresSection: React.FC = () => {
                       </span>
                     </div>
                     <button
-                      onClick={() => handleSave(rate.id)}
+                      onClick={() => handleSave(rate.type)}
                       disabled={isSaving}
                       className="btn-primary flex items-center space-x-1 px-3 py-2"
                     >
@@ -201,7 +253,7 @@ const TasasInteresSection: React.FC = () => {
                       )}
                     </button>
                     <button
-                      onClick={() => handleCancel(rate.id)}
+                      onClick={() => handleCancel(rate.type)}
                       className="btn-secondary px-3 py-2"
                     >
                       Cancelar
@@ -216,7 +268,7 @@ const TasasInteresSection: React.FC = () => {
                       <span className="text-sm text-secondary-500">anual</span>
                     </div>
                     <button
-                      onClick={() => handleEdit(rate.id, rate.rate)}
+                      onClick={() => handleEdit(rate.type, rate.rate)}
                       className="btn-secondary flex items-center space-x-1 px-3 py-2"
                     >
                       <Edit3 className="h-4 w-4" />

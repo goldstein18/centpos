@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Download, FileText, Calendar, Building, Filter } from 'lucide-react';
+import { getAuthToken } from '../lib/auth';
 
 const ReportsSection: React.FC = () => {
   const [filters, setFilters] = useState({
@@ -45,12 +46,20 @@ const ReportsSection: React.FC = () => {
         filters: filters
       });
       
+      const token = getAuthToken();
+      const headers: HeadersInit = {
+        Accept: 'text/csv,application/json',
+        'Cache-Control': 'no-cache'
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch(url, {
         method: 'GET',
-        headers: {
-          'Accept': 'text/csv,application/json',
-          'Cache-Control': 'no-cache'
-        }
+        headers,
+        credentials: 'include'
       });
 
       console.log('Respuesta del servidor:', {

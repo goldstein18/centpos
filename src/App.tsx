@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
+import { getAuthToken } from './lib/auth';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!getAuthToken());
+
+  useEffect(() => {
+    setIsAuthenticated(!!getAuthToken());
+  }, []);
 
   const handleLogin = (success: boolean) => {
     setIsAuthenticated(success);

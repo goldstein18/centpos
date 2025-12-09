@@ -38,7 +38,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         },
         credentials: 'include',
         body: JSON.stringify({
-          username: formData.username,
+          email: formData.username,
           password: formData.password
         })
       });
@@ -114,7 +114,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-secondary-700 mb-2">
-                Usuario
+                Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -123,10 +123,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <input
                   id="username"
                   name="username"
-                  type="text"
+                  type="email"
                   required
                   className="input-field pl-10"
-                  placeholder="Ingresa tu usuario"
+                  placeholder="Ingresa tu email"
                   value={formData.username}
                   onChange={handleChange}
                 />

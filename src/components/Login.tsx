@@ -23,10 +23,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     try {
       clearAuthToken();
 
+      const overrideUrl = process.env.REACT_APP_POS_LOGIN_URL;
       const baseUrl = process.env.REACT_APP_API_URL?.replace(/\/$/, '');
-      const endpoint = baseUrl
-        ? `${baseUrl}/admin/login`
-        : 'https://centdos-backend-production.up.railway.app/admin/login';
+      const endpoint = overrideUrl
+        ? overrideUrl.replace(/\/$/, '')
+        : baseUrl
+        ? `${baseUrl}/pos/login`
+        : 'https://centdos-backend-production.up.railway.app/pos/login';
 
       const response = await fetch(endpoint, {
         method: 'POST',

@@ -25,10 +25,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isMob
     { id: 'abonos', label: 'Abonos', icon: CreditCard },
     { id: 'pagos', label: 'Pagos', icon: DollarSign },
     { id: 'cancelar', label: 'Cancelar Abonos', icon: Ban },
-    { id: 'seguros', label: 'Seguros', icon: Shield },
-    { id: 'tasas', label: 'Tasas de Interés', icon: Percent },
+    { id: 'seguros', label: 'Seguros', icon: Shield, hidden: true },
+    { id: 'tasas', label: 'Tasas de Interés', icon: Percent, hidden: true },
     { id: 'reportes', label: 'Reportes', icon: FileText },
-  ];
+  ].filter(item => !item.hidden);
 
   const handleSectionChange = (sectionId: string) => {
     onSectionChange(sectionId);

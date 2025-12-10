@@ -45,6 +45,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
       const responseBody = await response.json().catch(() => ({}));
 
+      // Log para debugging
+      // eslint-disable-next-line no-console
+      console.log('Login response:', {
+        status: response.status,
+        ok: response.ok,
+        body: responseBody
+      });
+
       if (!response.ok) {
         const message =
           (responseBody && (responseBody.message || responseBody.error)) ||
@@ -53,21 +61,30 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         return;
       }
 
+      // Buscar token en diferentes ubicaciones posibles
       const token =
         responseBody?.token ??
         responseBody?.access_token ??
+        responseBody?.accessToken ??
         responseBody?.admin_access_token ??
         responseBody?.data?.token ??
+        responseBody?.data?.access_token ??
         null;
+
+      // eslint-disable-next-line no-console
+      console.log('Token encontrado:', token ? 'Sí' : 'No', 'Estructura completa:', responseBody);
 
       if (typeof token === 'string' && token.length > 0) {
         setAuthToken(token);
+        onLogin(true);
       } else {
+        // Si no hay token pero la respuesta fue exitosa, podría ser autenticación por cookies
+        // En este caso, marcamos como autenticado pero sin token
         // eslint-disable-next-line no-console
         console.warn('Inicio de sesión exitoso pero no se recibió token. Se confiará en las cookies del backend.');
+        // Aún así marcamos como autenticado si la respuesta fue exitosa
+        onLogin(true);
       }
-
-      onLogin(true);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('Error iniciando sesión:', err);

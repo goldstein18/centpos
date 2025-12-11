@@ -164,3 +164,4 @@ Si necesitas ayuda para integrar estos componentes, revisa:
 - El formato de datos que cada componente espera recibir
 
 
+

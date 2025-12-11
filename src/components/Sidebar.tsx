@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   CreditCard, 
   LogOut, 
@@ -12,6 +12,7 @@ import {
   Shield,
   Percent
 } from 'lucide-react';
+import { getUserInfo, fetchCurrentUser, clearAuthToken, UserInfo } from '../lib/auth';
 
 interface SidebarProps {
   activeSection: string;
@@ -21,6 +22,26 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isMobileMenuOpen, onMobileMenuToggle }) => {
+  const [userInfo, setUserInfoState] = useState<UserInfo | null>(null);
+
+  useEffect(() => {
+    // Obtener información del usuario al cargar
+    const loadUserInfo = async () => {
+      const cached = getUserInfo();
+      if (cached && (cached.name || cached.email)) {
+        setUserInfoState(cached);
+      } else {
+        // Si no hay información en cache, intentar obtenerla del servidor
+        const fetched = await fetchCurrentUser();
+        if (fetched) {
+          setUserInfoState(fetched);
+        }
+      }
+    };
+
+    loadUserInfo();
+  }, []);
+
   const navigationItems = [
     { id: 'abonos', label: 'Abonos', icon: CreditCard },
     { id: 'pagos', label: 'Pagos', icon: DollarSign },
@@ -29,6 +50,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isMob
     { id: 'tasas', label: 'Tasas de Interés', icon: Percent, hidden: true },
     { id: 'reportes', label: 'Reportes', icon: FileText },
   ].filter(item => !item.hidden);
+
+  const handleLogout = () => {
+    clearAuthToken();
+    window.location.href = '/login';
+  };
 
   const handleSectionChange = (sectionId: string) => {
     onSectionChange(sectionId);
@@ -110,15 +136,22 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isMob
               <User className="h-4 w-4 lg:h-5 lg:w-5 text-secondary-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs lg:text-sm font-medium text-secondary-900 truncate">Usuario Admin</p>
-              <p className="text-xs text-secondary-500 truncate">admin@centpos.com</p>
+              <p className="text-xs lg:text-sm font-medium text-secondary-900 truncate">
+                {userInfo?.name || userInfo?.nombre || 'Usuario'}
+              </p>
+              <p className="text-xs text-secondary-500 truncate">
+                {userInfo?.email || userInfo?.correo || 'usuario@centpos.com'}
+              </p>
             </div>
             <button className="p-1 text-secondary-400 hover:text-secondary-600">
               <Bell className="h-3 w-3 lg:h-4 lg:w-4" />
             </button>
           </div>
           
-          <button className="w-full flex items-center space-x-3 px-3 lg:px-4 py-2 text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900 rounded-lg transition-colors duration-200">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center space-x-3 px-3 lg:px-4 py-2 text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900 rounded-lg transition-colors duration-200"
+          >
             <LogOut className="h-3 w-3 lg:h-4 lg:w-4" />
             <span className="text-xs lg:text-sm font-medium">Cerrar Sesión</span>
           </button>

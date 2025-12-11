@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
-import { setAuthToken, clearAuthToken } from '../lib/auth';
+import { setAuthToken, clearAuthToken, setUserInfo, fetchCurrentUser, UserInfo } from '../lib/auth';
 
 interface LoginProps {
   onLogin: (success: boolean) => void;
@@ -45,13 +45,46 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
       const responseBody = await response.json().catch(() => ({}));
 
-      // Log para debugging
+      // Log para debugging - respuesta completa
       // eslint-disable-next-line no-console
-      console.log('Login response:', {
-        status: response.status,
-        ok: response.ok,
-        body: responseBody
+      console.log('=== LOGIN RESPONSE DEBUG ===');
+      // eslint-disable-next-line no-console
+      console.log('Status:', response.status);
+      // eslint-disable-next-line no-console
+      console.log('Response OK:', response.ok);
+      // eslint-disable-next-line no-console
+      console.log('Full response body:', JSON.stringify(responseBody, null, 2));
+      // eslint-disable-next-line no-console
+      console.log('Response keys:', Object.keys(responseBody));
+      
+      // Buscar información del usuario en diferentes ubicaciones
+      const possibleUserFields = [
+        'user', 'userInfo', 'usuario', 'data', 'profile', 'perfil',
+        'name', 'nombre', 'email', 'correo', 'fullName', 'full_name'
+      ];
+      
+      // eslint-disable-next-line no-console
+      console.log('=== BUSCANDO INFORMACIÓN DEL USUARIO ===');
+      possibleUserFields.forEach(field => {
+        if (responseBody[field]) {
+          // eslint-disable-next-line no-console
+          console.log(`Campo "${field}":`, responseBody[field]);
+        }
       });
+      
+      // Buscar en objetos anidados
+      if (responseBody.user) {
+        // eslint-disable-next-line no-console
+        console.log('responseBody.user:', responseBody.user);
+        // eslint-disable-next-line no-console
+        console.log('responseBody.user keys:', Object.keys(responseBody.user));
+      }
+      if (responseBody.data) {
+        // eslint-disable-next-line no-console
+        console.log('responseBody.data:', responseBody.data);
+        // eslint-disable-next-line no-console
+        console.log('responseBody.data keys:', Object.keys(responseBody.data));
+      }
 
       if (!response.ok) {
         const message =
@@ -73,6 +106,49 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
       // eslint-disable-next-line no-console
       console.log('Token encontrado:', token ? 'Sí' : 'No', 'Estructura completa:', responseBody);
+
+      // Intentar extraer información del usuario de la respuesta
+      const userInfo: UserInfo = {
+        name: responseBody?.name || responseBody?.nombre || responseBody?.user?.name || responseBody?.user?.nombre || responseBody?.data?.name || responseBody?.data?.nombre,
+        email: responseBody?.email || responseBody?.correo || responseBody?.user?.email || responseBody?.user?.correo || responseBody?.data?.email || responseBody?.data?.correo,
+        nombre: responseBody?.name || responseBody?.nombre || responseBody?.user?.name || responseBody?.user?.nombre,
+        correo: responseBody?.email || responseBody?.correo || responseBody?.user?.email || responseBody?.user?.correo
+      };
+
+      // eslint-disable-next-line no-console
+      console.log('=== INFORMACIÓN DEL USUARIO EXTRAÍDA ===');
+      // eslint-disable-next-line no-console
+      console.log('UserInfo extraído:', userInfo);
+      // eslint-disable-next-line no-console
+      console.log('¿Tiene nombre?', !!(userInfo.name || userInfo.nombre));
+      // eslint-disable-next-line no-console
+      console.log('¿Tiene email?', !!(userInfo.email || userInfo.correo));
+
+      // Si hay información del usuario, guardarla
+      if (userInfo.name || userInfo.email || userInfo.nombre || userInfo.correo) {
+        // eslint-disable-next-line no-console
+        console.log('✅ Guardando información del usuario en localStorage');
+        setUserInfo(userInfo);
+      } else {
+        // eslint-disable-next-line no-console
+        console.log('⚠️ No se encontró información del usuario en la respuesta. Intentando obtener del endpoint /me...');
+        // Si no viene en la respuesta, intentar obtenerla del endpoint /me
+        if (token) {
+          // Hacer la llamada de forma asíncrona sin bloquear el login
+          fetchCurrentUser().then(fetchedUser => {
+            if (fetchedUser) {
+              // eslint-disable-next-line no-console
+              console.log('✅ Información del usuario obtenida del endpoint /me:', fetchedUser);
+            } else {
+              // eslint-disable-next-line no-console
+              console.log('❌ No se pudo obtener información del usuario del endpoint /me');
+            }
+          }).catch(() => {
+            // eslint-disable-next-line no-console
+            console.log('❌ Error al obtener información del usuario del endpoint /me');
+          });
+        }
+      }
 
       if (typeof token === 'string' && token.length > 0) {
         setAuthToken(token);

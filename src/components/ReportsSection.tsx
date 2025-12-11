@@ -34,8 +34,12 @@ const ReportsSection: React.FC = () => {
     setDownloadType(type);
     
     try {
-      // Determinar el endpoint según el tipo
-      const baseEndpoint = 'https://centback-production.up.railway.app/pos/reportes';
+      // Usar variable de entorno o el endpoint específico de reportes
+      // Nota: Los reportes usan un servidor diferente (centback) que otros endpoints
+      const reportsBaseUrl = process.env.REACT_APP_REPORTS_API_URL?.replace(/\/$/, '') 
+        ?? 'https://centback-production.up.railway.app';
+      
+      const baseEndpoint = `${reportsBaseUrl}/pos/reportes`;
       const endpoint = type === 'with-phone' 
         ? `${baseEndpoint}/csv`
         : `${baseEndpoint}/csv-sin-telefono`;
@@ -51,29 +55,57 @@ const ReportsSection: React.FC = () => {
       });
       
       const token = getAuthToken();
+      
+      // Headers mínimos para evitar preflight si es posible
+      // Nota: Si el servidor requiere Authorization, el preflight es inevitable
       const headers: HeadersInit = {
-        Accept: 'text/csv,application/json',
-        'Cache-Control': 'no-cache'
+        Accept: 'text/csv,application/json'
       };
 
+      // Solo agregar Authorization si hay token
+      // Esto puede causar preflight, pero es necesario para autenticación
       if (token) {
         headers.Authorization = `Bearer ${token}`;
       }
+      
+      // No agregar Cache-Control si no es necesario para evitar preflight adicional
 
-      const response = await fetch(url, {
-        method: 'GET',
-        headers,
-        credentials: 'include'
-      });
+      console.log('Headers enviados:', headers);
+      console.log('Token presente:', !!token);
+
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          method: 'GET',
+          headers,
+          credentials: 'include'
+        });
+      } catch (fetchError) {
+        console.error('Error en fetch:', fetchError);
+        
+        // Detectar específicamente errores de preflight CORS
+        if (fetchError instanceof TypeError && fetchError.message.includes('Failed to fetch')) {
+          throw new Error('Error de CORS: El servidor no está respondiendo correctamente al preflight (OPTIONS request). Esto indica que:\n\n1. El servidor no tiene configurado CORS para este origen\n2. El endpoint no existe o la ruta está incorrecta\n3. El servidor no maneja peticiones OPTIONS\n\nContacta al administrador del backend para configurar CORS correctamente.');
+        }
+        
+        throw new Error(`Error de red: ${fetchError instanceof Error ? fetchError.message : 'No se pudo conectar al servidor. Verifica CORS y la conexión.'}`);
+      }
 
       console.log('Respuesta del servidor:', {
         status: response.status,
         statusText: response.statusText,
         headers: Object.fromEntries(response.headers.entries()),
-        ok: response.ok
+        ok: response.ok,
+        type: response.type,
+        url: response.url
       });
 
-      if (response.ok) {
+      // Verificar si es un error de CORS
+      if (response.type === 'opaque' || response.type === 'opaqueredirect') {
+        throw new Error('Error de CORS: El servidor no permite solicitudes desde este origen. Contacta al administrador.');
+      }
+
+      if (response.ok && response.status === 200) {
         const blob = await response.blob();
         console.log('Blob recibido:', {
           size: blob.size,
@@ -86,7 +118,12 @@ const ReportsSection: React.FC = () => {
         
         // Leer el contenido del blob para debug
         const text = await blob.text();
-        console.log('Contenido del CSV:', text.substring(0, 500)); // Primeros 500 caracteres
+        console.log('Contenido del CSV (primeros 500 caracteres):', text.substring(0, 500));
+        
+        // Verificar que realmente sea CSV
+        if (!text.trim()) {
+          throw new Error('El servidor respondió con un archivo vacío.');
+        }
         
         // Crear un nuevo blob con el contenido leído
         const newBlob = new Blob([text], { type: 'text/csv' });
@@ -105,13 +142,72 @@ const ReportsSection: React.FC = () => {
         
         alert(`Reporte descargado exitosamente: ${fileName}`);
       } else {
-        const errorText = await response.text();
+        // Obtener el mensaje de error del servidor
+        let errorText = '';
+        let errorData: any = {};
+        
+        try {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            errorData = await response.json();
+            errorText = JSON.stringify(errorData, null, 2);
+          } else {
+            errorText = await response.text();
+            errorData = { message: errorText, raw: errorText };
+          }
+        } catch (e) {
+          errorText = 'No se pudo leer el mensaje de error del servidor';
+          errorData = { error: errorText };
+        }
+        
+        console.error('=== ERROR AL DESCARGAR REPORTE ===');
+        console.error('Código de estado:', response.status);
+        console.error('Status Text:', response.statusText);
+        console.error('URL:', response.url);
         console.error('Error response body:', errorText);
-        throw new Error(`Error ${response.status}: ${response.statusText} - ${errorText}`);
+        console.error('Error data:', errorData);
+        
+        // Construir mensaje de error detallado
+        let errorMessage = `Error ${response.status}: ${response.statusText}`;
+        
+        // Agregar mensaje específico del servidor si existe
+        if (errorData.message) {
+          errorMessage += `\n\nMensaje del servidor: ${errorData.message}`;
+        } else if (errorData.error) {
+          errorMessage += `\n\nError: ${errorData.error}`;
+        } else if (errorText && errorText.trim()) {
+          errorMessage += `\n\nRespuesta del servidor: ${errorText}`;
+        }
+        
+        // Mensajes específicos según el código de estado
+        if (response.status === 400) {
+          errorMessage = `Error de validación (400): ${errorMessage}\n\nVerifica que las fechas estén en formato YYYY-MM-DD y sean válidas.`;
+        } else if (response.status === 401) {
+          errorMessage = `No autorizado (401): Por favor, inicia sesión nuevamente.\n\n${errorMessage}`;
+        } else if (response.status === 403) {
+          errorMessage = `Acceso denegado (403): No tienes permisos para descargar este reporte.\n\n${errorMessage}`;
+        } else if (response.status === 404) {
+          errorMessage = `Endpoint no encontrado (404): El endpoint no existe o la ruta está incorrecta.\n\nURL intentada: ${response.url}\n\n${errorMessage}`;
+        } else if (response.status === 500) {
+          errorMessage = `Error del servidor (500): El servidor encontró un error interno.\n\n${errorMessage}`;
+        } else if (response.status === 0) {
+          errorMessage = `Error de CORS o conexión (0): El servidor no está respondiendo.\n\n${errorMessage}`;
+        }
+        
+        // Agregar información de la petición para debugging
+        errorMessage += `\n\n--- Información de la petición ---`;
+        errorMessage += `\nEndpoint: ${url}`;
+        errorMessage += `\nTipo: ${type === 'with-phone' ? 'Con teléfono' : 'Sin teléfono'}`;
+        if (queryString) {
+          errorMessage += `\nParámetros: ${queryString}`;
+        }
+        
+        throw new Error(errorMessage);
       }
     } catch (error) {
       console.error('Error al descargar reporte:', error);
-      alert(`Error al descargar el reporte: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Error al descargar el reporte:\n\n${errorMessage}\n\nRevisa la consola para más detalles.`);
     } finally {
       setIsDownloading(false);
       setDownloadType(null);

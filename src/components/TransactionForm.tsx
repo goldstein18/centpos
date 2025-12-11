@@ -113,9 +113,13 @@ const TransactionForm: React.FC = () => {
         body: JSON.stringify(requestBody)
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
       if (response.ok) {
         const result = await response.json();
-        alert(`¡Abono registrado exitosamente!\n\nTeléfono: ${formData.phone1}\nMonto: $${finalAmount}\nAutorización: ${result.autorizacion || 'N/A'}`);
+        console.log('Success response:', result);
+        alert(`¡Abono registrado exitosamente!\n\nTeléfono: ${formData.phone1}\nMonto: $${finalAmount}\nAutorización: ${result.autorizacion || result.autorización || 'N/A'}`);
         
         // Limpiar formulario
         setFormData({
@@ -126,19 +130,53 @@ const TransactionForm: React.FC = () => {
         });
         setErrors({});
       } else {
-        const errorData = await response.json().catch(() => ({}));
+        // Intentar obtener el mensaje de error del servidor
+        let errorMessage = `Error ${response.status}: ${response.statusText}`;
+        let errorData: any = {};
+        
+        try {
+          const responseText = await response.text();
+          console.error('Error response text:', responseText);
+          
+          if (responseText) {
+            try {
+              errorData = JSON.parse(responseText);
+              console.error('Error response JSON:', errorData);
+            } catch (e) {
+              // Si no es JSON, usar el texto directamente
+              errorData = { message: responseText, raw: responseText };
+            }
+          }
+        } catch (e) {
+          console.error('Error reading error response:', e);
+        }
+        
         console.error('API Error Details:', {
           status: response.status,
           statusText: response.statusText,
           errorData: errorData,
-          requestBody: {
-            telefono: formData.phone1,
-            telefonoConfirmacion: formData.phone2,
-            monto: parseFloat(finalAmount),
-            montoConfirmacion: parseFloat(finalAmount)
-          }
+          requestBody: requestBody
         });
-        throw new Error(errorData.message || errorData.error || `Error ${response.status}: ${response.statusText}`);
+        
+        // Construir mensaje de error más descriptivo
+        errorMessage = errorData.message 
+          || errorData.error 
+          || errorData.raw
+          || errorData.details
+          || `Error ${response.status}: ${response.statusText}`;
+        
+        // Mensajes específicos según el código de estado
+        if (response.status === 500) {
+          errorMessage = `Error del servidor (500): ${errorMessage}\n\nEl servidor encontró un error interno. Por favor, verifica:\n- Que los datos enviados sean correctos\n- Que el servidor esté funcionando correctamente\n\nDetalles técnicos: ${JSON.stringify(errorData, null, 2)}`;
+        } else if (response.status === 400) {
+          errorMessage = `Error de validación (400): ${errorMessage}\n\nPor favor, verifica que todos los campos sean correctos.`;
+        } else if (response.status === 401) {
+          errorMessage = `No autorizado (401): Por favor, inicia sesión nuevamente.`;
+        } else if (response.status === 403) {
+          errorMessage = `Acceso denegado (403): No tienes permisos para realizar esta operación.`;
+        }
+        
+        throw new Error(errorMessage);
       }
     } catch (error) {
       console.error('Error al registrar abono:', error);

@@ -109,9 +109,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
       // Intentar extraer información del usuario de la respuesta
       const userInfo: UserInfo = {
-        name: responseBody?.name || responseBody?.nombre || responseBody?.user?.name || responseBody?.user?.nombre || responseBody?.data?.name || responseBody?.data?.nombre,
+        name: responseBody?.full_name || responseBody?.fullName || responseBody?.name || responseBody?.nombre || responseBody?.user?.name || responseBody?.user?.nombre || responseBody?.user?.full_name || responseBody?.user?.fullName || responseBody?.data?.name || responseBody?.data?.nombre || responseBody?.data?.full_name || responseBody?.data?.fullName,
         email: responseBody?.email || responseBody?.correo || responseBody?.user?.email || responseBody?.user?.correo || responseBody?.data?.email || responseBody?.data?.correo,
-        nombre: responseBody?.name || responseBody?.nombre || responseBody?.user?.name || responseBody?.user?.nombre,
+        nombre: responseBody?.full_name || responseBody?.fullName || responseBody?.name || responseBody?.nombre || responseBody?.user?.name || responseBody?.user?.nombre || responseBody?.user?.full_name || responseBody?.user?.fullName,
         correo: responseBody?.email || responseBody?.correo || responseBody?.user?.email || responseBody?.user?.correo
       };
 

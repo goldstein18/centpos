@@ -96,9 +96,9 @@ export const fetchCurrentUser = async (): Promise<UserInfo | null> => {
           const data = await response.json();
           // Normalizar la respuesta a nuestro formato
           const userInfo: UserInfo = {
-            name: data.name || data.nombre || data.fullName || data.full_name,
+            name: data.full_name || data.fullName || data.name || data.nombre,
             email: data.email || data.correo || data.emailAddress || data.email_address,
-            nombre: data.name || data.nombre,
+            nombre: data.full_name || data.fullName || data.name || data.nombre,
             correo: data.email || data.correo
           };
           

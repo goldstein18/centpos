@@ -54,24 +54,22 @@ const ReportsSection: React.FC = () => {
         filters: filters
       });
       
-      const token = getAuthToken();
-      
-      // Headers mínimos para evitar preflight si es posible
-      // Nota: Si el servidor requiere Authorization, el preflight es inevitable
+      // NOTA: Los endpoints de reportes POS están abiertos (sin guard) y no requieren token.
+      // El backend POS no emite token en el login, así que no intentamos usar Authorization.
+      // Si en el futuro se protegen con JWT, habrá que agregar el token aquí.
       const headers: HeadersInit = {
         Accept: 'text/csv,application/json'
       };
 
-      // Solo agregar Authorization si hay token
-      // Esto puede causar preflight, pero es necesario para autenticación
-      if (token) {
-        headers.Authorization = `Bearer ${token}`;
-      }
+      // Los endpoints de reportes POS no requieren Authorization actualmente
+      // Si en el futuro se protegen, descomentar esto:
+      // const token = getAuthToken();
+      // if (token) {
+      //   headers.Authorization = `Bearer ${token}`;
+      // }
       
-      // No agregar Cache-Control si no es necesario para evitar preflight adicional
-
       console.log('Headers enviados:', headers);
-      console.log('Token presente:', !!token);
+      console.log('Nota: Endpoints de reportes POS no requieren token (están abiertos)');
 
       let response: Response;
       try {
@@ -82,10 +80,31 @@ const ReportsSection: React.FC = () => {
         });
       } catch (fetchError) {
         console.error('Error en fetch:', fetchError);
+        console.error('Error type:', fetchError instanceof Error ? fetchError.constructor.name : typeof fetchError);
+        console.error('Error message:', fetchError instanceof Error ? fetchError.message : String(fetchError));
         
         // Detectar específicamente errores de preflight CORS
-        if (fetchError instanceof TypeError && fetchError.message.includes('Failed to fetch')) {
-          throw new Error('Error de CORS: El servidor no está respondiendo correctamente al preflight (OPTIONS request). Esto indica que:\n\n1. El servidor no tiene configurado CORS para este origen\n2. El endpoint no existe o la ruta está incorrecta\n3. El servidor no maneja peticiones OPTIONS\n\nContacta al administrador del backend para configurar CORS correctamente.');
+        if (fetchError instanceof TypeError && (fetchError.message.includes('Failed to fetch') || fetchError.message.includes('Load failed'))) {
+          const errorDetails = `\n\n--- Detalles del Error ---
+URL: ${url}
+Origen: ${window.location.origin}
+Método: GET
+Headers: ${JSON.stringify(headers, null, 2)}
+
+El servidor está devolviendo 404 en el preflight OPTIONS, lo que indica:
+1. El servidor NO tiene configurado CORS para permitir solicitudes desde ${window.location.origin}
+2. El endpoint puede no existir o la ruta estar incorrecta
+3. El servidor NO está manejando correctamente las peticiones OPTIONS (preflight)
+
+SOLUCIÓN REQUERIDA EN EL BACKEND:
+El servidor debe:
+- Responder a OPTIONS con status 200/204 (no 404)
+- Incluir header: Access-Control-Allow-Origin: ${window.location.origin}
+- Incluir header: Access-Control-Allow-Methods: GET, OPTIONS
+- Incluir header: Access-Control-Allow-Headers: Authorization, Accept
+- Incluir header: Access-Control-Allow-Credentials: true (si usa cookies)`;
+          
+          throw new Error(`Error de CORS: El servidor no permite solicitudes desde este origen.${errorDetails}`);
         }
         
         throw new Error(`Error de red: ${fetchError instanceof Error ? fetchError.message : 'No se pudo conectar al servidor. Verifica CORS y la conexión.'}`);
@@ -106,27 +125,41 @@ const ReportsSection: React.FC = () => {
       }
 
       if (response.ok && response.status === 200) {
+        // Verificar el Content-Type
+        const contentType = response.headers.get('content-type') || '';
+        console.log('Content-Type recibido:', contentType);
+        
         const blob = await response.blob();
         console.log('Blob recibido:', {
           size: blob.size,
-          type: blob.type
+          type: blob.type,
+          contentType: contentType
         });
         
-        if (blob.size === 0) {
-          throw new Error('El archivo CSV está vacío. No hay datos para descargar.');
+        // Leer el contenido del blob para verificar
+        const text = await blob.text();
+        console.log('=== CONTENIDO DEL CSV ===');
+        console.log('Tamaño del texto:', text.length);
+        console.log('Primeros 1000 caracteres:', text.substring(0, 1000));
+        console.log('¿Está vacío?', !text.trim());
+        console.log('Número de líneas:', text.split('\n').length);
+        
+        // Verificar si el CSV está vacío o solo tiene headers
+        const lines = text.split('\n').filter(line => line.trim());
+        const hasData = lines.length > 1; // Más de una línea (header + datos)
+        
+        if (blob.size === 0 || !text.trim()) {
+          throw new Error('El servidor respondió con un archivo CSV vacío. No hay datos para el rango de fechas seleccionado.');
         }
         
-        // Leer el contenido del blob para debug
-        const text = await blob.text();
-        console.log('Contenido del CSV (primeros 500 caracteres):', text.substring(0, 500));
-        
-        // Verificar que realmente sea CSV
-        if (!text.trim()) {
-          throw new Error('El servidor respondió con un archivo vacío.');
+        if (!hasData) {
+          // Solo tiene header, no hay datos
+          console.warn('El CSV solo contiene headers, no hay datos');
+          alert('El reporte se descargó pero no contiene datos para el rango de fechas seleccionado.\n\nEl archivo solo contiene los encabezados de las columnas.');
         }
         
         // Crear un nuevo blob con el contenido leído
-        const newBlob = new Blob([text], { type: 'text/csv' });
+        const newBlob = new Blob([text], { type: 'text/csv;charset=utf-8' });
         
         const downloadUrl = window.URL.createObjectURL(newBlob);
         const link = document.createElement('a');
@@ -140,7 +173,9 @@ const ReportsSection: React.FC = () => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(downloadUrl);
         
-        alert(`Reporte descargado exitosamente: ${fileName}`);
+        if (hasData) {
+          alert(`Reporte descargado exitosamente: ${fileName}\n\nContiene ${lines.length - 1} registros.`);
+        }
       } else {
         // Obtener el mensaje de error del servidor
         let errorText = '';

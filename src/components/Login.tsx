@@ -95,17 +95,50 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       }
 
       // Buscar token en diferentes ubicaciones posibles
-      const token =
+      let token =
         responseBody?.token ??
         responseBody?.access_token ??
         responseBody?.accessToken ??
         responseBody?.admin_access_token ??
+        responseBody?.pos_token ??
+        responseBody?.posToken ??
         responseBody?.data?.token ??
         responseBody?.data?.access_token ??
         null;
 
+      // También buscar en headers de respuesta (algunos backends envían el token en headers)
+      const authHeader = response.headers.get('Authorization');
+      if (!token && authHeader) {
+        // Extraer token de "Bearer <token>" o solo el token
+        token = authHeader.replace(/^Bearer\s+/i, '') || authHeader;
+        // eslint-disable-next-line no-console
+        console.log('Token encontrado en header Authorization:', token ? 'Sí' : 'No');
+      }
+
+      // Buscar en otros headers comunes
+      const tokenHeader = response.headers.get('X-Auth-Token') || 
+                          response.headers.get('X-Token') || 
+                          response.headers.get('Token');
+      if (!token && tokenHeader) {
+        token = tokenHeader;
+        // eslint-disable-next-line no-console
+        console.log('Token encontrado en header personalizado');
+      }
+
+      // Log de todos los headers para debugging
       // eslint-disable-next-line no-console
-      console.log('Token encontrado:', token ? 'Sí' : 'No', 'Estructura completa:', responseBody);
+      console.log('=== HEADERS DE RESPUESTA ===');
+      // eslint-disable-next-line no-console
+      console.log('Todos los headers:', Object.fromEntries(response.headers.entries()));
+      // eslint-disable-next-line no-console
+      console.log('Authorization header:', response.headers.get('Authorization'));
+      // eslint-disable-next-line no-console
+      console.log('Set-Cookie header:', response.headers.get('Set-Cookie'));
+
+      // eslint-disable-next-line no-console
+      console.log('Token encontrado:', token ? 'Sí' : 'No', token ? `(${token.substring(0, 20)}...)` : '');
+      // eslint-disable-next-line no-console
+      console.log('Estructura completa de respuesta:', responseBody);
 
       // Intentar extraer información del usuario de la respuesta
       const userInfo: UserInfo = {

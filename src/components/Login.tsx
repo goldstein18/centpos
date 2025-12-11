@@ -145,7 +145,11 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         name: responseBody?.full_name || responseBody?.fullName || responseBody?.name || responseBody?.nombre || responseBody?.user?.name || responseBody?.user?.nombre || responseBody?.user?.full_name || responseBody?.user?.fullName || responseBody?.data?.name || responseBody?.data?.nombre || responseBody?.data?.full_name || responseBody?.data?.fullName,
         email: responseBody?.email || responseBody?.correo || responseBody?.user?.email || responseBody?.user?.correo || responseBody?.data?.email || responseBody?.data?.correo,
         nombre: responseBody?.full_name || responseBody?.fullName || responseBody?.name || responseBody?.nombre || responseBody?.user?.name || responseBody?.user?.nombre || responseBody?.user?.full_name || responseBody?.user?.fullName,
-        correo: responseBody?.email || responseBody?.correo || responseBody?.user?.email || responseBody?.user?.correo
+        correo: responseBody?.email || responseBody?.correo || responseBody?.user?.email || responseBody?.user?.correo,
+        // Guardar IDs necesarios para asociar abonos
+        id: responseBody?.id || responseBody?.user_id || responseBody?.user?.id || responseBody?.data?.id,
+        branch_id: responseBody?.branch_id || responseBody?.branchId || responseBody?.user?.branch_id || responseBody?.data?.branch_id,
+        user_id: responseBody?.id || responseBody?.user_id || responseBody?.user?.id || responseBody?.data?.id
       };
 
       // eslint-disable-next-line no-console

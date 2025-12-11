@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CreditCard, Phone, DollarSign } from 'lucide-react';
-import { getAuthToken } from '../lib/auth';
+import { getAuthToken, getUserInfo } from '../lib/auth';
 
 const TransactionForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -82,12 +82,34 @@ const TransactionForm: React.FC = () => {
     
     try {
       const finalAmount = formatAmount(formData.amount1);
-      const requestBody = {
+      
+      // Obtener información del usuario para asociar el abono
+      const userInfo = getUserInfo();
+      const branch_id = userInfo?.branch_id;
+      const user_id = userInfo?.id || userInfo?.user_id;
+      
+      const requestBody: any = {
         telefono: formData.phone1,
         telefonoConfirmacion: formData.phone2,
         monto: parseFloat(finalAmount),
         montoConfirmacion: parseFloat(finalAmount)
       };
+      
+      // Agregar branch_id y user_id si están disponibles
+      if (branch_id) {
+        requestBody.branch_id = branch_id;
+      }
+      if (user_id) {
+        requestBody.user_id = user_id;
+        // También intentar con pos_user_id si el backend lo requiere
+        requestBody.pos_user_id = user_id;
+      }
+      
+      console.log('User info para asociar abono:', {
+        branch_id,
+        user_id,
+        userInfo
+      });
       
       const endpoint = 'https://centdos-backend-production.up.railway.app/pos/abonos';
 

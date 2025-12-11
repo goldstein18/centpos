@@ -6,6 +6,9 @@ export interface UserInfo {
   email?: string;
   nombre?: string;
   correo?: string;
+  id?: string;
+  branch_id?: string;
+  user_id?: string;
 }
 
 export const setAuthToken = (token: string) => {

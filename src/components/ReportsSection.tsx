@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Download, FileText, Calendar, Building, Filter } from 'lucide-react';
-import { getAuthToken } from '../lib/auth';
+import { getAuthToken, getUserInfo } from '../lib/auth';
 
 const ReportsSection: React.FC = () => {
   const [filters, setFilters] = useState({
@@ -22,9 +22,26 @@ const ReportsSection: React.FC = () => {
   const buildQueryString = () => {
     const params = new URLSearchParams();
     
-    // Solo agregar parámetros si hay fechas seleccionadas
-    if (filters.fechaInicio) params.append('fechaInicio', filters.fechaInicio);
-    if (filters.fechaFin) params.append('fechaFin', filters.fechaFin);
+    // Obtener branch_id del usuario logueado si está disponible
+    const userInfo = getUserInfo();
+    const branchId = userInfo?.branch_id || filters.sucursal;
+    
+    // Agregar parámetros opcionales según lo que espera el backend:
+    // - sucursal (branchId) - opcional
+    // - fechaInicio - opcional
+    // - fechaFin - opcional
+    if (branchId && branchId !== 'prueba') {
+      // El backend espera 'sucursal' pero puede aceptar branchId también
+      params.append('sucursal', branchId);
+    }
+    
+    if (filters.fechaInicio) {
+      params.append('fechaInicio', filters.fechaInicio);
+    }
+    
+    if (filters.fechaFin) {
+      params.append('fechaFin', filters.fechaFin);
+    }
     
     return params.toString();
   };
@@ -35,7 +52,9 @@ const ReportsSection: React.FC = () => {
     
     try {
       // Usar variable de entorno o el endpoint específico de reportes
-      // Nota: Los reportes usan un servidor diferente (centback) que otros endpoints
+      // NOTA: Los reportes usan un servidor diferente (centback) que otros endpoints
+      // Host correcto: https://centback-production.up.railway.app
+      // Rutas correctas: /pos/reportes/csv y /pos/reportes/csv-sin-telefono
       const reportsBaseUrl = process.env.REACT_APP_REPORTS_API_URL?.replace(/\/$/, '') 
         ?? 'https://centback-production.up.railway.app';
       
@@ -47,12 +66,20 @@ const ReportsSection: React.FC = () => {
       const queryString = buildQueryString();
       const url = queryString ? `${endpoint}?${queryString}` : endpoint;
       
-      console.log('Descargando reporte:', {
-        type: type,
-        url: url,
-        queryString: queryString,
-        filters: filters
-      });
+      console.log('=== DESCARGANDO REPORTE ===');
+      console.log('Tipo:', type === 'with-phone' ? 'Con teléfono' : 'Sin teléfono');
+      console.log('Host:', reportsBaseUrl);
+      console.log('Ruta base:', baseEndpoint);
+      console.log('Endpoint completo:', endpoint);
+      console.log('URL final:', url);
+      console.log('Query string:', queryString);
+      console.log('Filtros:', filters);
+      console.log('');
+      console.log('NOTA: Si recibes 404, verifica que el backend esté desplegado con los endpoints:');
+      console.log('  - GET /pos/reportes/csv');
+      console.log('  - GET /pos/reportes/csv-sin-telefono');
+      console.log('Prueba con curl:');
+      console.log(`  curl -i "${url}"`);
       
       // NOTA: Los endpoints de reportes POS están abiertos (sin guard) y no requieren token.
       // El backend POS no emite token en el login, así que no intentamos usar Authorization.

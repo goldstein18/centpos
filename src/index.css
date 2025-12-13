@@ -6,6 +6,11 @@
   body {
     @apply bg-secondary-50 text-secondary-900;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: 'Source Sans 3', 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  * {
+    font-family: 'Source Sans 3', 'Inter', system-ui, -apple-system, sans-serif;
   }
 }
 

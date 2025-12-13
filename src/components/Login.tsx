@@ -229,9 +229,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-3">We're Making Improvements! ✨</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-3">We're Making Improvements!</h2>
             <p className="text-lg text-gray-600 mb-2">We're currently updating the system to serve you better.</p>
-            <p className="text-base text-gray-500">Please check back in a little while. Thank you for your patience! 😊</p>
+            <p className="text-base text-gray-500">Please check back in a little while. Thank you for your patience!</p>
           </div>
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-sm text-gray-400">We'll be back soon!</p>

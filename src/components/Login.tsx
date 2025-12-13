@@ -222,19 +222,19 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-100 p-3 sm:p-4 lg:p-6 relative">
       {/* Maintenance Overlay */}
       <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 backdrop-blur-[2px]">
-        <div className="bg-white rounded-2xl p-8 sm:p-10 max-w-md mx-4 text-center shadow-2xl border-2 border-blue-100">
+        <div className="bg-white rounded-2xl p-8 sm:p-10 max-w-md mx-4 text-center shadow-2xl border-2 border-blue-100 font-sans">
           <div className="mb-6">
             <div className="h-20 w-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
               <svg className="h-10 w-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-3">We're Making Improvements!</h2>
-            <p className="text-lg text-gray-600 mb-2">We're currently updating the system to serve you better.</p>
-            <p className="text-base text-gray-500">Please check back in a little while. Thank you for your patience!</p>
+            <h2 className="text-3xl font-bold text-gray-800 mb-3 font-sans">We're Making Improvements!</h2>
+            <p className="text-lg text-gray-600 mb-2 font-sans">We're currently updating the system to serve you better.</p>
+            <p className="text-base text-gray-500 font-sans">Please check back in a little while. Thank you for your patience!</p>
           </div>
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-400">We'll be back soon!</p>
+            <p className="text-sm text-gray-400 font-sans">We'll be back soon!</p>
           </div>
         </div>
       </div>

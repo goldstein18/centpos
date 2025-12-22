@@ -45,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSectionChange, isMob
   const navigationItems = [
     { id: 'abonos', label: 'Abonos', icon: CreditCard },
     { id: 'pagos', label: 'Pagos', icon: DollarSign },
-    { id: 'cancelar', label: 'Cancelar Abonos', icon: Ban },
+    { id: 'cancelar', label: 'Cancelar Transacciones', icon: Ban },
     { id: 'seguros', label: 'Seguros', icon: Shield, hidden: true },
     { id: 'tasas', label: 'Tasas de Interés', icon: Percent, hidden: true },
     { id: 'reportes', label: 'Reportes', icon: FileText },

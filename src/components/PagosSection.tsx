@@ -8,8 +8,10 @@ import {
   Send,
   Eye,
   EyeOff,
-  Clock
+  Clock,
+  AlertTriangle
 } from 'lucide-react';
+import { getUserInfo } from '../lib/auth';
 
 const PagosSection: React.FC = () => {
   const [step, setStep] = useState<'phone' | 'amount' | 'otp' | 'success'>('phone');
@@ -21,6 +23,8 @@ const PagosSection: React.FC = () => {
   const [showAmount, setShowAmount] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transactionNumber, setTransactionNumber] = useState('');
+  const [error, setError] = useState('');
+  const [paymentData, setPaymentData] = useState<any>(null);
 
   const formatAmount = (value: string) => {
     // Remove any non-numeric characters
@@ -60,71 +64,127 @@ const PagosSection: React.FC = () => {
 
   const handlePhoneSubmit = () => {
     if (!phoneNumber.trim() || !confirmPhone.trim()) {
-      alert('Por favor completa ambos campos de teléfono');
+      setError('Por favor completa ambos campos de teléfono');
       return;
     }
     
     if (phoneNumber !== confirmPhone) {
-      alert('Los números de teléfono no coinciden');
+      setError('Los números de teléfono no coinciden');
       return;
     }
     
-    if (phoneNumber.length !== 10) {
-      alert('El número de teléfono debe tener 10 dígitos');
+    if (phoneNumber.length !== 10 && phoneNumber.length !== 12) {
+      setError('El número de teléfono debe tener 10 o 12 dígitos');
       return;
     }
     
+    setError('');
     setStep('amount');
   };
 
   const handleAmountSubmit = () => {
     if (!amount.trim() || !confirmAmount.trim()) {
-      alert('Por favor completa ambos campos de monto');
+      setError('Por favor completa ambos campos de monto');
       return;
     }
     
     if (amount !== confirmAmount) {
-      alert('Los montos no coinciden');
+      setError('Los montos no coinciden');
       return;
     }
     
     // Check if amount is greater than 0
-    const numericAmount = parseFloat(amount.replace(/[^\d.]/g, ''));
+    const numericAmount = parseFloat(amount.replace(/[^\d.]/g, '')) / 10; // Convert from internal format to decimal
     if (numericAmount <= 0) {
-      alert('El monto debe ser mayor a $0.00');
+      setError('El monto debe ser mayor a $0.00');
       return;
     }
     
-    setIsProcessing(true);
-    
-    // Simulate payment processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      setStep('otp');
-    }, 2000);
+    setError('');
+    setStep('otp');
   };
 
-  const handleOtpSubmit = () => {
+  const handleOtpSubmit = async () => {
     if (!otpCode.trim()) {
-      alert('Por favor ingresa el código OTP');
+      setError('Por favor ingresa el código OTP');
       return;
     }
     
     if (otpCode.length !== 6) {
-      alert('El código OTP debe tener 6 dígitos');
+      setError('El código OTP debe tener 6 dígitos');
       return;
     }
     
-    // Simulate OTP verification
-    if (otpCode === '123456') {
-      // Generate transaction number
-      const timestamp = Date.now().toString().slice(-6);
-      const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-      const generatedTransactionNumber = `TXN${timestamp}${randomNum}`;
-      setTransactionNumber(generatedTransactionNumber);
-      setStep('success');
-    } else {
-      alert('Código OTP incorrecto. Intenta nuevamente.');
+    setIsProcessing(true);
+    setError('');
+    
+    try {
+      // Obtener información del usuario para asociar el pago
+      const userInfo = getUserInfo();
+      const branch_id = userInfo?.branch_id;
+      const pos_user_id = userInfo?.id || userInfo?.user_id;
+      
+      // Convertir el monto del formato interno (ej: 100 = $10.00) a decimal
+      const numericAmount = parseFloat(amount.replace(/[^\d.]/g, '')) / 10;
+      
+      // Construir el request body según la documentación
+      const requestBody: any = {
+        phone_number: phoneNumber,
+        phone_confirmation: confirmPhone,
+        amount: numericAmount,
+        amount_confirmation: numericAmount,
+        otp: otpCode
+      };
+      
+      // Agregar campos opcionales si están disponibles
+      if (pos_user_id) {
+        requestBody.pos_user_id = pos_user_id;
+      }
+      if (branch_id) {
+        requestBody.branch_id = branch_id;
+      }
+      
+      // Usar el mismo base URL que otros endpoints POS
+      const baseUrl = process.env.REACT_APP_API_URL?.replace(/\/$/, '') 
+        ?? 'https://centdos-backend-production.up.railway.app';
+      const endpoint = `${baseUrl}/pos/pagos`;
+      
+      console.log('Procesando pago:', {
+        endpoint,
+        requestBody
+      });
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(requestBody)
+      });
+      
+      const responseData = await response.json();
+      
+      console.log('Respuesta del pago:', {
+        status: response.status,
+        data: responseData
+      });
+      
+      if (response.ok) {
+        // Pago exitoso
+        setPaymentData(responseData);
+        setTransactionNumber(responseData.reference || responseData.id || 'N/A');
+        setStep('success');
+      } else {
+        // Error del servidor
+        const errorMessage = responseData.message || responseData.error || `Error ${response.status}: ${response.statusText}`;
+        setError(errorMessage);
+      }
+    } catch (err) {
+      console.error('Error al procesar pago:', err);
+      setError(err instanceof Error ? err.message : 'Error al procesar el pago. Intenta nuevamente.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -138,6 +198,8 @@ const PagosSection: React.FC = () => {
     setShowAmount(false);
     setIsProcessing(false);
     setTransactionNumber('');
+    setError('');
+    setPaymentData(null);
   };
 
   const renderPhoneStep = () => (
@@ -151,6 +213,13 @@ const PagosSection: React.FC = () => {
       </div>
 
       <div className="space-y-4">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center space-x-2">
+            <AlertTriangle className="h-5 w-5" />
+            <span>{error}</span>
+          </div>
+        )}
+        
         <div>
           <label className="block text-sm font-medium text-secondary-700 mb-2">Número de Teléfono</label>
           <div className="relative">
@@ -158,10 +227,10 @@ const PagosSection: React.FC = () => {
             <input
               type="tel"
               className="input-field pl-10"
-              placeholder="Ej: 5512345678"
+              placeholder="Ej: 5512345678 o 525551234567"
               value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
-              maxLength={10}
+              onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 12))}
+              maxLength={12}
             />
           </div>
         </div>
@@ -173,10 +242,10 @@ const PagosSection: React.FC = () => {
             <input
               type="tel"
               className="input-field pl-10"
-              placeholder="Ej: 5512345678"
+              placeholder="Ej: 5512345678 o 525551234567"
               value={confirmPhone}
-              onChange={(e) => setConfirmPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-              maxLength={10}
+              onChange={(e) => setConfirmPhone(e.target.value.replace(/\D/g, '').slice(0, 12))}
+              maxLength={12}
             />
           </div>
         </div>
@@ -315,28 +384,42 @@ const PagosSection: React.FC = () => {
       </div>
 
       <div className="card p-6">
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-secondary-700 mb-2">Código OTP</label>
-            <input
-              type="text"
-              className="input-field text-center text-lg font-mono"
-              placeholder="123456"
-              value={otpCode}
-              onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              maxLength={6}
-            />
+      <div className="space-y-4">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center space-x-2">
+            <AlertTriangle className="h-5 w-5" />
+            <span>{error}</span>
           </div>
-          
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-center space-x-2">
-              <Clock className="h-4 w-4 text-blue-600" />
-              <span className="text-sm text-blue-700">
-                Código de prueba: <strong>123456</strong>
-              </span>
-            </div>
+        )}
+        
+        <div>
+          <label className="block text-sm font-medium text-secondary-700 mb-2">Código OTP</label>
+          <input
+            type="text"
+            className="input-field text-center text-lg font-mono"
+            placeholder="123456"
+            value={otpCode}
+            onChange={(e) => {
+              setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6));
+              setError(''); // Clear error when user types
+            }}
+            maxLength={6}
+            disabled={isProcessing}
+          />
+          <p className="text-xs text-secondary-500 mt-1">
+            Ingresa el código OTP de 6 dígitos que el cliente recibió en su app
+          </p>
+        </div>
+        
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-center space-x-2">
+            <Clock className="h-4 w-4 text-blue-600" />
+            <span className="text-sm text-blue-700">
+              El código OTP es válido por 2 minutos desde su generación
+            </span>
           </div>
         </div>
+      </div>
       </div>
 
       <div className="flex justify-between">
@@ -349,11 +432,20 @@ const PagosSection: React.FC = () => {
         </button>
         <button
           onClick={handleOtpSubmit}
-          disabled={!otpCode}
+          disabled={!otpCode || isProcessing}
           className="btn-primary flex items-center space-x-2"
         >
-          <CheckCircle className="h-4 w-4" />
-          <span>Verificar OTP</span>
+          {isProcessing ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <span>Procesando...</span>
+            </>
+          ) : (
+            <>
+              <CheckCircle className="h-4 w-4" />
+              <span>Verificar OTP</span>
+            </>
+          )}
         </button>
       </div>
     </div>
@@ -372,21 +464,33 @@ const PagosSection: React.FC = () => {
       <div className="card p-6">
         <div className="space-y-4">
           <div className="flex justify-between">
-            <span className="text-secondary-600">Número de Transacción:</span>
-            <span className="font-medium text-primary-600">{transactionNumber}</span>
+            <span className="text-secondary-600">Referencia de Pago:</span>
+            <span className="font-medium text-primary-600">{paymentData?.reference || paymentData?.id || transactionNumber}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-secondary-600">Teléfono:</span>
-            <span className="font-medium">{phoneNumber}</span>
+            <span className="font-medium">{paymentData?.phone_number || phoneNumber}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-secondary-600">Monto:</span>
-            <span className="font-medium">{formatAmount(amount)}</span>
+            <span className="font-medium">
+              ${paymentData?.amount?.toFixed(2) || formatAmount(amount)}
+            </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-secondary-600">Fecha:</span>
-            <span className="font-medium">{new Date().toLocaleDateString('es-MX')}</span>
+            <span className="text-secondary-600">Estado:</span>
+            <span className="font-medium px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+              {paymentData?.status || 'Completado'}
+            </span>
           </div>
+          {paymentData?.created_at && (
+            <div className="flex justify-between">
+              <span className="text-secondary-600">Fecha:</span>
+              <span className="font-medium">
+                {new Date(paymentData.created_at).toLocaleString('es-MX')}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

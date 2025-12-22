@@ -99,10 +99,10 @@ const ReportsSection: React.FC = () => {
     
     try {
       // Usar variable de entorno o el endpoint específico de reportes
-      // NOTA: Los reportes usan un servidor diferente (centback) que otros endpoints
-      // Host correcto: https://centback-production.up.railway.app
-      // Rutas correctas: /pos/reportes/csv y /pos/reportes/csv-sin-telefono
+      // NOTA: Los reportes pueden usar un servidor diferente (centback) o el mismo (centdos-backend)
+      // Intentar primero con REACT_APP_REPORTS_API_URL, luego con centback, luego con el API_URL principal
       const reportsBaseUrl = process.env.REACT_APP_REPORTS_API_URL?.replace(/\/$/, '') 
+        ?? process.env.REACT_APP_API_URL?.replace(/\/$/, '')
         ?? 'https://centback-production.up.railway.app';
       
       const baseEndpoint = `${reportsBaseUrl}/pos/reportes`;
@@ -115,7 +115,9 @@ const ReportsSection: React.FC = () => {
       
       console.log('=== DESCARGANDO REPORTE ===');
       console.log('Tipo:', type === 'with-phone' ? 'Con teléfono' : 'Sin teléfono');
-      console.log('Host:', reportsBaseUrl);
+      console.log('Base URL usado:', reportsBaseUrl);
+      console.log('  - REACT_APP_REPORTS_API_URL:', process.env.REACT_APP_REPORTS_API_URL || 'no definido');
+      console.log('  - REACT_APP_API_URL:', process.env.REACT_APP_API_URL || 'no definido');
       console.log('Ruta base:', baseEndpoint);
       console.log('Endpoint completo:', endpoint);
       console.log('URL final:', url);
@@ -126,11 +128,14 @@ const ReportsSection: React.FC = () => {
         fechaFin: filters.fechaFin
       });
       console.log('');
-      console.log('NOTA: Si recibes 404, verifica que el backend esté desplegado con los endpoints:');
-      console.log('  - GET /pos/reportes/csv');
-      console.log('  - GET /pos/reportes/csv-sin-telefono');
-      console.log('Prueba con curl:');
-      console.log(`  curl -i "${url}"`);
+      console.log('NOTA: Si recibes 404 o CORS, verifica que:');
+      console.log('  1. El backend esté desplegado con los endpoints:');
+      console.log('     - GET /pos/reportes/csv');
+      console.log('     - GET /pos/reportes/csv-sin-telefono');
+      console.log('  2. El servidor tenga CORS configurado para:', window.location.origin);
+      console.log('  3. Prueba con curl:');
+      console.log(`     curl -X GET "${url}" -H "Accept: text/csv" -v`);
+      console.log(`     curl -X OPTIONS "${url}" -H "Origin: ${window.location.origin}" -H "Access-Control-Request-Method: GET" -v`);
       
       // NOTA: Los endpoints de reportes POS están abiertos (sin guard) y no requieren token.
       // El backend POS no emite token en el login, así que no intentamos usar Authorization.
@@ -151,10 +156,12 @@ const ReportsSection: React.FC = () => {
 
       let response: Response;
       try {
+        // NOTA: No usamos credentials: 'include' porque puede causar problemas de CORS
+        // si el servidor no está configurado correctamente con Access-Control-Allow-Credentials
         response = await fetch(url, {
           method: 'GET',
           headers,
-          credentials: 'include'
+          // credentials: 'include' - Removido para evitar problemas de CORS
         });
       } catch (fetchError) {
         console.error('Error en fetch:', fetchError);
@@ -163,6 +170,9 @@ const ReportsSection: React.FC = () => {
         
         // Detectar específicamente errores de preflight CORS
         if (fetchError instanceof TypeError && (fetchError.message.includes('Failed to fetch') || fetchError.message.includes('Load failed'))) {
+          const curlCommand = `curl -X OPTIONS "${url}" -H "Origin: ${window.location.origin}" -H "Access-Control-Request-Method: GET" -v`;
+          const curlCommandGet = `curl -X GET "${url}" -H "Accept: text/csv" -v`;
+          
           const errorDetails = `\n\n--- Detalles del Error ---
 URL: ${url}
 Origen: ${window.location.origin}
@@ -174,13 +184,20 @@ El servidor está devolviendo 404 en el preflight OPTIONS, lo que indica:
 2. El endpoint puede no existir o la ruta estar incorrecta
 3. El servidor NO está manejando correctamente las peticiones OPTIONS (preflight)
 
+--- Verificación del Endpoint ---
+Para verificar si el endpoint existe, ejecuta en tu terminal:
+${curlCommandGet}
+
+Si el endpoint existe pero falla CORS, ejecuta:
+${curlCommand}
+
 SOLUCIÓN REQUERIDA EN EL BACKEND:
 El servidor debe:
 - Responder a OPTIONS con status 200/204 (no 404)
-- Incluir header: Access-Control-Allow-Origin: ${window.location.origin}
+- Incluir header: Access-Control-Allow-Origin: ${window.location.origin} (o *)
 - Incluir header: Access-Control-Allow-Methods: GET, OPTIONS
-- Incluir header: Access-Control-Allow-Headers: Authorization, Accept
-- Incluir header: Access-Control-Allow-Credentials: true (si usa cookies)`;
+- Incluir header: Access-Control-Allow-Headers: Authorization, Accept, Content-Type
+- Si el endpoint no existe, debe estar desplegado en el servidor`;
           
           throw new Error(`Error de CORS: El servidor no permite solicitudes desde este origen.${errorDetails}`);
         }
@@ -335,7 +352,15 @@ El servidor debe:
     } catch (error) {
       console.error('Error al descargar reporte:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      alert(`Error al descargar el reporte:\n\n${errorMessage}\n\nRevisa la consola para más detalles.`);
+      
+      // Determinar si es un error de CORS
+      const isCorsError = errorMessage.includes('CORS') || errorMessage.includes('Failed to fetch') || errorMessage.includes('Load failed');
+      
+      if (isCorsError) {
+        alert(`Error de CORS al descargar el reporte:\n\n${errorMessage}\n\nEste es un problema de configuración del servidor. El backend debe:\n1. Permitir solicitudes desde ${window.location.origin}\n2. Responder correctamente a las peticiones OPTIONS (preflight)\n3. Incluir los headers CORS necesarios\n\nRevisa la consola para más detalles y comandos curl para verificar.`);
+      } else {
+        alert(`Error al descargar el reporte:\n\n${errorMessage}\n\nRevisa la consola para más detalles.`);
+      }
     } finally {
       setIsDownloading(false);
       setDownloadType(null);

@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
-import { Download, FileText, Calendar, Building, Filter } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Download, FileText, Calendar, Building, Filter, AlertCircle } from 'lucide-react';
 import { getAuthToken, getUserInfo } from '../lib/auth';
 
 const ReportsSection: React.FC = () => {
   const [filters, setFilters] = useState({
-    sucursal: 'prueba',
     fechaInicio: '',
     fechaFin: ''
   });
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadType, setDownloadType] = useState<'with-phone' | 'without-phone' | null>(null);
+  const [userBranchId, setUserBranchId] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string>('');
+
+  useEffect(() => {
+    // Obtener branch_id del usuario logueado
+    const userInfo = getUserInfo();
+    if (userInfo?.branch_id) {
+      setUserBranchId(userInfo.branch_id);
+    }
+  }, []);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -17,36 +26,74 @@ const ReportsSection: React.FC = () => {
       ...prev,
       [name]: value
     }));
+    // Limpiar error de validación cuando el usuario modifica los filtros
+    if (validationError) {
+      setValidationError('');
+    }
   };
 
-  const buildQueryString = () => {
+  const validateFilters = (): string | null => {
+    // Validar que se tenga branch_id del usuario
+    if (!userBranchId) {
+      return 'No se pudo obtener la información de sucursal del usuario. Por favor, inicia sesión nuevamente.';
+    }
+
+    // Validar que las fechas sean requeridas
+    if (!filters.fechaInicio) {
+      return 'La fecha de inicio es requerida.';
+    }
+
+    if (!filters.fechaFin) {
+      return 'La fecha de fin es requerida.';
+    }
+
+    // Validar formato de fecha (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(filters.fechaInicio)) {
+      return 'La fecha de inicio debe estar en formato YYYY-MM-DD.';
+    }
+
+    if (!dateRegex.test(filters.fechaFin)) {
+      return 'La fecha de fin debe estar en formato YYYY-MM-DD.';
+    }
+
+    // Validar que fechaInicio no sea posterior a fechaFin
+    const startDate = new Date(filters.fechaInicio);
+    const endDate = new Date(filters.fechaFin);
+    if (startDate > endDate) {
+      return 'La fecha de inicio no puede ser posterior a la fecha de fin.';
+    }
+
+    return null;
+  };
+
+  const buildQueryString = (): string => {
     const params = new URLSearchParams();
     
-    // Obtener branch_id del usuario logueado si está disponible
-    const userInfo = getUserInfo();
-    const branchId = userInfo?.branch_id || filters.sucursal;
-    
-    // Agregar parámetros opcionales según lo que espera el backend:
-    // - sucursal (branchId) - opcional
-    // - fechaInicio - opcional
-    // - fechaFin - opcional
-    if (branchId && branchId !== 'prueba') {
-      // El backend espera 'sucursal' pero puede aceptar branchId también
-      params.append('sucursal', branchId);
+    // sucursal es requerido (branch_id del usuario)
+    if (userBranchId) {
+      params.append('sucursal', userBranchId);
     }
     
-    if (filters.fechaInicio) {
-      params.append('fechaInicio', filters.fechaInicio);
-    }
+    // fechaInicio es requerido
+    params.append('fechaInicio', filters.fechaInicio);
     
-    if (filters.fechaFin) {
-      params.append('fechaFin', filters.fechaFin);
-    }
+    // fechaFin es requerido
+    params.append('fechaFin', filters.fechaFin);
     
     return params.toString();
   };
 
   const downloadReport = async (type: 'with-phone' | 'without-phone') => {
+    // Validar filtros antes de descargar
+    const validationError = validateFilters();
+    if (validationError) {
+      setValidationError(validationError);
+      alert(`Error de validación:\n\n${validationError}`);
+      return;
+    }
+
+    setValidationError('');
     setIsDownloading(true);
     setDownloadType(type);
     
@@ -64,7 +111,7 @@ const ReportsSection: React.FC = () => {
         : `${baseEndpoint}/csv-sin-telefono`;
       
       const queryString = buildQueryString();
-      const url = queryString ? `${endpoint}?${queryString}` : endpoint;
+      const url = `${endpoint}?${queryString}`;
       
       console.log('=== DESCARGANDO REPORTE ===');
       console.log('Tipo:', type === 'with-phone' ? 'Con teléfono' : 'Sin teléfono');
@@ -73,7 +120,11 @@ const ReportsSection: React.FC = () => {
       console.log('Endpoint completo:', endpoint);
       console.log('URL final:', url);
       console.log('Query string:', queryString);
-      console.log('Filtros:', filters);
+      console.log('Parámetros:', {
+        sucursal: userBranchId,
+        fechaInicio: filters.fechaInicio,
+        fechaFin: filters.fechaFin
+      });
       console.log('');
       console.log('NOTA: Si recibes 404, verifica que el backend esté desplegado con los endpoints:');
       console.log('  - GET /pos/reportes/csv');
@@ -188,12 +239,27 @@ El servidor debe:
         // Crear un nuevo blob con el contenido leído
         const newBlob = new Blob([text], { type: 'text/csv;charset=utf-8' });
         
+        // Intentar obtener el nombre del archivo del header Content-Disposition
+        let fileName = '';
+        const contentDisposition = response.headers.get('Content-Disposition');
+        if (contentDisposition) {
+          const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+          if (fileNameMatch) {
+            fileName = fileNameMatch[1];
+          }
+        }
+        
+        // Si no hay nombre en el header, generar uno
+        if (!fileName) {
+          const endDate = filters.fechaFin || new Date().toISOString().split('T')[0];
+          fileName = type === 'with-phone'
+            ? `reporte-pos-con-telefono-${endDate}.csv`
+            : `reporte-pos-sin-telefono-${endDate}.csv`;
+        }
+
         const downloadUrl = window.URL.createObjectURL(newBlob);
         const link = document.createElement('a');
         link.href = downloadUrl;
-        const fileName = type === 'with-phone'
-          ? `reporte-abonos-con-telefono-${new Date().toISOString().split('T')[0]}.csv`
-          : `reporte-abonos-sin-telefono-${new Date().toISOString().split('T')[0]}.csv`;
         link.download = fileName;
         document.body.appendChild(link);
         link.click();
@@ -243,7 +309,7 @@ El servidor debe:
         
         // Mensajes específicos según el código de estado
         if (response.status === 400) {
-          errorMessage = `Error de validación (400): ${errorMessage}\n\nVerifica que las fechas estén en formato YYYY-MM-DD y sean válidas.`;
+          errorMessage = `Error de validación (400): ${errorMessage}\n\nVerifica que:\n- Se proporcione sucursal o marca\n- Las fechas estén en formato YYYY-MM-DD\n- La fecha de inicio no sea posterior a la fecha de fin\n- La sucursal o marca existan en el sistema`;
         } else if (response.status === 401) {
           errorMessage = `No autorizado (401): Por favor, inicia sesión nuevamente.\n\n${errorMessage}`;
         } else if (response.status === 403) {
@@ -278,10 +344,10 @@ El servidor debe:
 
   const clearFilters = () => {
     setFilters({
-      sucursal: 'prueba',
       fechaInicio: '',
       fechaFin: ''
     });
+    setValidationError('');
   };
 
   const hasActiveFilters = filters.fechaInicio !== '' || filters.fechaFin !== '';
@@ -297,8 +363,8 @@ El servidor debe:
             <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" />
           </div>
           <div>
-            <h2 className="text-lg sm:text-xl font-semibold text-secondary-900">Reportes de Abonos</h2>
-            <p className="text-xs sm:text-sm text-secondary-500">Descarga reportes CSV de abonos registrados</p>
+            <h2 className="text-lg sm:text-xl font-semibold text-secondary-900">Reportes de Transacciones POS</h2>
+            <p className="text-xs sm:text-sm text-secondary-500">Descarga reportes CSV de transacciones (abonos y pagos)</p>
           </div>
         </div>
       </div>
@@ -310,34 +376,39 @@ El servidor debe:
           <h3 className="text-base sm:text-lg font-medium text-secondary-900">Filtros de Reporte</h3>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {/* Sucursal Filter */}
-          <div>
-            <label className="block text-sm font-medium text-secondary-700 mb-2">
-              <Building className="h-4 w-4 inline mr-1" />
-              Sucursal
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                name="sucursal"
-                className="input-field bg-secondary-100 cursor-not-allowed"
-                value={filters.sucursal}
-                disabled
-                readOnly
-              />
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <span className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded-full">Fijo</span>
-              </div>
-            </div>
-            <p className="text-xs text-secondary-500 mt-1">Valor fijo para pruebas</p>
+        {/* Validation Error */}
+        {validationError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-2">
+            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-red-700">{validationError}</p>
           </div>
+        )}
+
+        {/* Sucursal Info */}
+        <div className="mb-4 p-3 bg-primary-50 border border-primary-200 rounded-lg">
+          <div className="flex items-center space-x-2 mb-2">
+            <Building className="h-4 w-4 text-primary-600" />
+            <span className="text-sm font-medium text-primary-800">Sucursal</span>
+          </div>
+          <p className="text-sm text-primary-700">
+            {userBranchId ? (
+              <>ID: <span className="font-mono text-xs">{userBranchId}</span></>
+            ) : (
+              <span className="text-red-600">No disponible. Por favor, inicia sesión nuevamente.</span>
+            )}
+          </p>
+          <p className="text-xs text-primary-600 mt-1">
+            El reporte incluirá todas las transacciones de tu sucursal y su marca.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 
           {/* Fecha Inicio */}
           <div>
             <label className="block text-sm font-medium text-secondary-700 mb-2">
               <Calendar className="h-4 w-4 inline mr-1" />
-              Fecha Inicio
+              Fecha Inicio <span className="text-red-500">*</span>
             </label>
             <input
               type="date"
@@ -345,14 +416,16 @@ El servidor debe:
               className="input-field"
               value={filters.fechaInicio}
               onChange={handleFilterChange}
+              required
             />
+            <p className="text-xs text-secondary-500 mt-1">Formato: YYYY-MM-DD</p>
           </div>
 
           {/* Fecha Fin */}
           <div>
             <label className="block text-sm font-medium text-secondary-700 mb-2">
               <Calendar className="h-4 w-4 inline mr-1" />
-              Fecha Fin
+              Fecha Fin <span className="text-red-500">*</span>
             </label>
             <input
               type="date"
@@ -360,7 +433,9 @@ El servidor debe:
               className="input-field"
               value={filters.fechaFin}
               onChange={handleFilterChange}
+              required
             />
+            <p className="text-xs text-secondary-500 mt-1">Formato: YYYY-MM-DD</p>
           </div>
         </div>
 
@@ -405,19 +480,18 @@ El servidor debe:
               <ul className="space-y-1 text-xs">
                 <li>• Teléfono</li>
                 <li>• Monto</li>
-                <li>• Tipo</li>
-                <li>• Autorización</li>
+                <li>• Tipo (Abono, Pago, etc.)</li>
+                <li>• Referencia</li>
                 <li>• Sucursal</li>
-                <li>• Usuario</li>
-                <li>• Fecha (México)</li>
+                <li>• Fecha (DD/MM/YYYY)</li>
               </ul>
             </div>
           </div>
 
           <button
             onClick={() => downloadReport('with-phone')}
-            disabled={isDownloading}
-            className="btn-primary w-full flex justify-center items-center text-sm sm:text-base py-2 sm:py-3"
+            disabled={isDownloading || !userBranchId || !filters.fechaInicio || !filters.fechaFin}
+            className="btn-primary w-full flex justify-center items-center text-sm sm:text-base py-2 sm:py-3 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isDownloading && downloadType === 'with-phone' ? (
               <>
@@ -450,19 +524,18 @@ El servidor debe:
               <p className="font-medium mb-2">Columnas incluidas:</p>
               <ul className="space-y-1 text-xs">
                 <li>• Monto</li>
-                <li>• Tipo</li>
-                <li>• Autorización</li>
+                <li>• Tipo (Abono, Pago, etc.)</li>
+                <li>• Referencia</li>
                 <li>• Sucursal</li>
-                <li>• Usuario</li>
-                <li>• Fecha (México)</li>
+                <li>• Fecha (DD/MM/YYYY)</li>
               </ul>
             </div>
           </div>
 
           <button
             onClick={() => downloadReport('without-phone')}
-            disabled={isDownloading}
-            className="btn-primary w-full flex justify-center items-center text-sm sm:text-base py-2 sm:py-3"
+            disabled={isDownloading || !userBranchId || !filters.fechaInicio || !filters.fechaFin}
+            className="btn-primary w-full flex justify-center items-center text-sm sm:text-base py-2 sm:py-3 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isDownloading && downloadType === 'without-phone' ? (
               <>
@@ -484,11 +557,13 @@ El servidor debe:
         <div className="bg-primary-50 border border-primary-200 rounded-lg p-3 sm:p-4">
           <h4 className="text-xs sm:text-sm font-medium text-primary-800 mb-2">💡 Información sobre los Reportes</h4>
           <ul className="text-xs sm:text-sm text-primary-700 space-y-1">
-            <li>• Los reportes se descargan en formato CSV</li>
-            <li>• Sucursal y Usuario están fijos en "prueba" para desarrollo</li>
-            <li>• Solo las fechas son filtros opcionales</li>
-            <li>• Las fechas deben estar en formato YYYY-MM-DD</li>
-            <li>• Los archivos se nombran automáticamente con la fecha actual</li>
+            <li>• Los reportes se descargan en formato CSV compatible con Excel (UTF-8 con BOM)</li>
+            <li>• La sucursal se obtiene automáticamente de tu sesión</li>
+            <li>• El reporte incluye todas las transacciones de tu sucursal y su marca</li>
+            <li>• Las fechas de inicio y fin son requeridas (formato YYYY-MM-DD)</li>
+            <li>• Ambos rangos de fecha son inclusivos (incluyen el día inicial y final)</li>
+            <li>• Los reportes incluyen: Abonos (depósitos) y Pagos (transacciones de tipo payment)</li>
+            <li>• Los archivos se nombran automáticamente con la fecha de descarga</li>
           </ul>
         </div>
       </div>

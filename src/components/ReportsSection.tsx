@@ -99,11 +99,11 @@ const ReportsSection: React.FC = () => {
     
     try {
       // Usar variable de entorno o el endpoint específico de reportes
-      // NOTA: Los reportes pueden usar un servidor diferente (centback) o el mismo (centdos-backend)
-      // Intentar primero con REACT_APP_REPORTS_API_URL, luego con centback, luego con el API_URL principal
+      // NOTA: Los reportes usan el mismo servidor que otros endpoints POS (centdos-backend)
+      // Intentar primero con REACT_APP_REPORTS_API_URL, luego con REACT_APP_API_URL, luego con centdos-backend
       const reportsBaseUrl = process.env.REACT_APP_REPORTS_API_URL?.replace(/\/$/, '') 
         ?? process.env.REACT_APP_API_URL?.replace(/\/$/, '')
-        ?? 'https://centback-production.up.railway.app';
+        ?? 'https://centdos-backend-production.up.railway.app';
       
       const baseEndpoint = `${reportsBaseUrl}/pos/reportes`;
       const endpoint = type === 'with-phone' 

@@ -26,40 +26,32 @@ const PagosSection: React.FC = () => {
   const [error, setError] = useState('');
   const [paymentData, setPaymentData] = useState<any>(null);
 
+  const formatCurrency = (value: number) => new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value);
+
+  const parseAmountValue = (value: string) => {
+    const numericValue = value.replace(/\D/g, '');
+    return numericValue ? parseInt(numericValue, 10) / 100 : 0;
+  };
+
   const formatAmount = (value: string) => {
-    // Remove any non-numeric characters
     const numericValue = value.replace(/\D/g, '');
     
     if (numericValue === '') return '';
     
-    // Convert to decimal (divide by 10)
-    const decimalValue = parseInt(numericValue) / 10;
-    
-    // Format as currency
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1
-    }).format(decimalValue);
+    return formatCurrency(parseAmountValue(value));
   };
 
   const formatAmountInput = (value: string) => {
-    // Remove any non-numeric characters
     const numericValue = value.replace(/\D/g, '');
     
     if (numericValue === '') return '';
     
-    // Convert to decimal (divide by 10)
-    const decimalValue = parseInt(numericValue) / 10;
-    
-    // Format as currency for input display
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1
-    }).format(decimalValue);
+    return formatCurrency(parseAmountValue(value));
   };
 
   const handlePhoneSubmit = () => {
@@ -94,7 +86,7 @@ const PagosSection: React.FC = () => {
     }
     
     // Check if amount is greater than 0
-    const numericAmount = parseFloat(amount.replace(/[^\d.]/g, '')) / 10; // Convert from internal format to decimal
+    const numericAmount = parseAmountValue(amount);
     if (numericAmount <= 0) {
       setError('El monto debe ser mayor a $0.00');
       return;
@@ -124,8 +116,8 @@ const PagosSection: React.FC = () => {
       const branch_id = userInfo?.branch_id;
       const pos_user_id = userInfo?.id || userInfo?.user_id;
       
-      // Convertir el monto del formato interno (ej: 100 = $10.00) a decimal
-      const numericAmount = parseFloat(amount.replace(/[^\d.]/g, '')) / 10;
+      // Convertir el monto del formato interno en centavos (ej: 1000 = $10.00) a decimal
+      const numericAmount = parseAmountValue(amount);
       
       // Construir el request body según la documentación
       const requestBody: any = {
@@ -299,7 +291,7 @@ const PagosSection: React.FC = () => {
             </button>
           </div>
           <p className="text-xs text-secondary-500 mt-1">
-            Ejemplo: Para $10.0 ingresa 100, para $1.5 ingresa 15
+            Ejemplo: Para $10.00 ingresa 1000, para $1.50 ingresa 150
           </p>
         </div>
 
@@ -337,9 +329,9 @@ const PagosSection: React.FC = () => {
           <h4 className="text-sm font-medium text-[#0d9488] mb-2">💡 Información del Sistema</h4>
           <ul className="text-sm text-[#0d9488] space-y-1">
             <li>• El monto se formatea automáticamente en el campo</li>
-            <li>• Para pagar $10.0, introduce: 100</li>
-            <li>• Para pagar $1.5, introduce: 15</li>
-            <li>• Para pagar $0.5, introduce: 5</li>
+            <li>• Para pagar $10.00, introduce: 1000</li>
+            <li>• Para pagar $1.50, introduce: 150</li>
+            <li>• Para pagar $0.50, introduce: 50</li>
           </ul>
         </div>
       </div>
@@ -474,7 +466,7 @@ const PagosSection: React.FC = () => {
           <div className="flex justify-between">
             <span className="text-secondary-600">Monto:</span>
             <span className="font-medium">
-              ${paymentData?.amount?.toFixed(2) || formatAmount(amount)}
+              {formatCurrency(Number(paymentData?.amount ?? parseAmountValue(amount)))}
             </span>
           </div>
           <div className="flex justify-between">

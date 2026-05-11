@@ -36,13 +36,13 @@ const TransactionForm: React.FC = () => {
   const getDisplayValue = (value: string) => {
     if (!value) return '';
     const num = parseInt(value);
-    return (num / 10).toFixed(1);
+    return (num / 100).toFixed(2);
   };
 
   const formatAmount = (value: string) => {
     if (!value) return '';
     const num = parseInt(value);
-    return (num / 10).toFixed(1);
+    return (num / 100).toFixed(2);
   };
 
   const validateForm = () => {
@@ -300,7 +300,7 @@ const TransactionForm: React.FC = () => {
                   name="amount1"
                   required
                   className={`input-field pl-10 ${errors.amount1 ? 'border-red-500' : ''}`}
-                  placeholder="Ej: 100 para $10.00"
+                  placeholder="Ej: 1000 para $10.00"
                   value={getDisplayValue(formData.amount1)}
                   onChange={handleChange}
                 />
@@ -340,9 +340,9 @@ const TransactionForm: React.FC = () => {
           <h4 className="text-sm font-medium text-[#0d9488] mb-2">💡 Información del Sistema</h4>
           <ul className="text-sm text-[#0d9488] space-y-1">
             <li>• El monto se formatea automáticamente en el campo</li>
-            <li>• Para abonar $10.00, introduce: 100</li>
-            <li>• Para abonar $1.50, introduce: 15</li>
-            <li>• Para abonar $0.50, introduce: 5</li>
+            <li>• Para abonar $10.00, introduce: 1000</li>
+            <li>• Para abonar $1.50, introduce: 150</li>
+            <li>• Para abonar $0.50, introduce: 50</li>
           </ul>
         </div>
 

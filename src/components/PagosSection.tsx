@@ -33,25 +33,29 @@ const PagosSection: React.FC = () => {
     maximumFractionDigits: 2
   }).format(value);
 
+  const normalizeAmountInput = (value: string) => {
+    const sanitized = value.replace(/[^0-9.]/g, '');
+    const [integerPart, ...decimalParts] = sanitized.split('.');
+    const decimalPart = decimalParts.join('').slice(0, 2);
+
+    return sanitized.includes('.') ? `${integerPart}.${decimalPart}` : integerPart;
+  };
+
   const parseAmountValue = (value: string) => {
-    const numericValue = value.replace(/\D/g, '');
-    return numericValue ? parseInt(numericValue, 10) / 100 : 0;
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : 0;
   };
 
   const formatAmount = (value: string) => {
-    const numericValue = value.replace(/\D/g, '');
-    
-    if (numericValue === '') return '';
+    if (!value.trim()) return '';
     
     return formatCurrency(parseAmountValue(value));
   };
 
   const formatAmountInput = (value: string) => {
-    const numericValue = value.replace(/\D/g, '');
+    if (!value.trim()) return '';
     
-    if (numericValue === '') return '';
-    
-    return formatCurrency(parseAmountValue(value));
+    return parseAmountValue(value).toFixed(2);
   };
 
   const handlePhoneSubmit = () => {
@@ -80,15 +84,15 @@ const PagosSection: React.FC = () => {
       return;
     }
     
-    if (amount !== confirmAmount) {
-      setError('Los montos no coinciden');
-      return;
-    }
-    
-    // Check if amount is greater than 0
     const numericAmount = parseAmountValue(amount);
+    const numericConfirmAmount = parseAmountValue(confirmAmount);
     if (numericAmount <= 0) {
       setError('El monto debe ser mayor a $0.00');
+      return;
+    }
+
+    if (numericAmount !== numericConfirmAmount) {
+      setError('Los montos no coinciden');
       return;
     }
     
@@ -116,15 +120,15 @@ const PagosSection: React.FC = () => {
       const branch_id = userInfo?.branch_id;
       const pos_user_id = userInfo?.id || userInfo?.user_id;
       
-      // Convertir el monto del formato interno en centavos (ej: 1000 = $10.00) a decimal
       const numericAmount = parseAmountValue(amount);
+      const numericConfirmAmount = parseAmountValue(confirmAmount);
       
       // Construir el request body según la documentación
       const requestBody: any = {
         phone_number: phoneNumber,
         phone_confirmation: confirmPhone,
         amount: numericAmount,
-        amount_confirmation: numericAmount,
+        amount_confirmation: numericConfirmAmount,
         otp: otpCode
       };
       
@@ -276,12 +280,13 @@ const PagosSection: React.FC = () => {
               type="text"
               className="input-field pl-10 pr-10"
               placeholder="$0.00"
-              value={formatAmountInput(amount)}
+              value={amount}
               onChange={(e) => {
-                // Extract numeric value from formatted string
-                const numericValue = e.target.value.replace(/[^\d]/g, '');
-                setAmount(numericValue);
+                if (e.target.value.includes(',')) return;
+                setAmount(normalizeAmountInput(e.target.value));
               }}
+              onBlur={() => setAmount(formatAmountInput(amount))}
+              inputMode="decimal"
             />
             <button
               onClick={() => setShowAmount(!showAmount)}
@@ -291,7 +296,7 @@ const PagosSection: React.FC = () => {
             </button>
           </div>
           <p className="text-xs text-secondary-500 mt-1">
-            Ejemplo: Para $10.00 ingresa 1000, para $1.50 ingresa 150
+            Ejemplo: Para $10.00 ingresa 10.00, para $1.50 ingresa 1.50
           </p>
         </div>
 
@@ -303,12 +308,13 @@ const PagosSection: React.FC = () => {
               type="text"
               className="input-field pl-10"
               placeholder="$0.00"
-              value={formatAmountInput(confirmAmount)}
+              value={confirmAmount}
               onChange={(e) => {
-                // Extract numeric value from formatted string
-                const numericValue = e.target.value.replace(/[^\d]/g, '');
-                setConfirmAmount(numericValue);
+                if (e.target.value.includes(',')) return;
+                setConfirmAmount(normalizeAmountInput(e.target.value));
               }}
+              onBlur={() => setConfirmAmount(formatAmountInput(confirmAmount))}
+              inputMode="decimal"
             />
           </div>
         </div>
@@ -328,10 +334,10 @@ const PagosSection: React.FC = () => {
         <div className="bg-[#f0fdfd] border border-[#3bbcc8] rounded-lg p-4">
           <h4 className="text-sm font-medium text-[#0d9488] mb-2">💡 Información del Sistema</h4>
           <ul className="text-sm text-[#0d9488] space-y-1">
-            <li>• El monto se formatea automáticamente en el campo</li>
-            <li>• Para pagar $10.00, introduce: 1000</li>
-            <li>• Para pagar $1.50, introduce: 150</li>
-            <li>• Para pagar $0.50, introduce: 50</li>
+            <li>• El monto acepta hasta 2 decimales</li>
+            <li>• Para pagar $10.00, introduce: 10.00</li>
+            <li>• Para pagar $1.50, introduce: 1.50</li>
+            <li>• Para pagar $0.50, introduce: 0.50</li>
           </ul>
         </div>
       </div>

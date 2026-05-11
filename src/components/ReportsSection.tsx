@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, FileText, Calendar, Building, Filter, AlertCircle } from 'lucide-react';
-import { getAuthToken, getUserInfo } from '../lib/auth';
+import { getUserInfo } from '../lib/auth';
 
 const ReportsSection: React.FC = () => {
   const [filters, setFilters] = useState({

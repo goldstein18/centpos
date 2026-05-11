@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   Percent,
   Save,
@@ -45,7 +45,7 @@ const TasasInteresSection: React.FC = () => {
   const getRateBgColor = (type: 'PRO' | 'Normal') =>
     type === 'PRO' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200';
 
-  const fetchRates = async () => {
+  const fetchRates = useCallback(async () => {
     setIsLoading(true);
     try {
       const token = getAuthToken();
@@ -83,11 +83,11 @@ const TasasInteresSection: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [investmentEndpoint]);
 
   useEffect(() => {
     fetchRates();
-  }, []);
+  }, [fetchRates]);
 
   const handleEdit = (rateType: 'PRO' | 'Normal', currentRate: number) => {
     setEditingRate(rateType);
@@ -192,6 +192,12 @@ const TasasInteresSection: React.FC = () => {
               {saveMessage.message}
             </span>
           </div>
+        </div>
+      )}
+
+      {isLoading && (
+        <div className="card p-4">
+          <span className="text-sm text-secondary-600">Cargando tasas...</span>
         </div>
       )}
 

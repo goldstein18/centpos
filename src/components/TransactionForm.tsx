@@ -13,11 +13,34 @@ const TransactionForm: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
 
+  const normalizeAmountInput = (value: string) => {
+    const sanitized = value.replace(/[^0-9.]/g, '');
+    const [integerPart, ...decimalParts] = sanitized.split('.');
+    const decimalPart = decimalParts.join('').slice(0, 2);
+
+    return sanitized.includes('.') ? `${integerPart}.${decimalPart}` : integerPart;
+  };
+
+  const parseAmount = (value: string) => {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : NaN;
+  };
+
+  const formatAmount = (value: string) => {
+    const amount = parseAmount(value);
+    return Number.isFinite(amount) ? amount.toFixed(2) : '';
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
-    // Remover el punto decimal y convertir a número
-    const cleanValue = value.replace(/[^0-9]/g, '');
+    const isAmountField = name === 'amount1' || name === 'amount2';
+    if (isAmountField && value.includes(',')) {
+      return;
+    }
+
+    const cleanValue = isAmountField
+      ? normalizeAmountInput(value)
+      : value.replace(/[^0-9]/g, '');
     
     setFormData(prev => ({
       ...prev,
@@ -33,20 +56,17 @@ const TransactionForm: React.FC = () => {
     }
   };
 
-  const getDisplayValue = (value: string) => {
-    if (!value) return '';
-    const num = parseInt(value);
-    return (num / 100).toFixed(2);
-  };
-
-  const formatAmount = (value: string) => {
-    if (!value) return '';
-    const num = parseInt(value);
-    return (num / 100).toFixed(2);
+  const handleAmountBlur = (field: 'amount1' | 'amount2') => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: formatAmount(prev[field])
+    }));
   };
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
+    const amount1 = parseAmount(formData.amount1);
+    const amount2 = parseAmount(formData.amount2);
 
     // Validar teléfono
     if (formData.phone1 !== formData.phone2) {
@@ -59,12 +79,14 @@ const TransactionForm: React.FC = () => {
       newErrors.phone1 = 'El número debe tener exactamente 10 dígitos numéricos';
     }
 
-    // Validar monto
-    if (formData.amount1 !== formData.amount2) {
-      newErrors.amount2 = 'Los montos no coinciden';
-    }
-    if (parseInt(formData.amount1) <= 0) {
+    if (!Number.isFinite(amount1) || amount1 <= 0) {
       newErrors.amount1 = 'El monto debe ser mayor a 0';
+    }
+    if (!Number.isFinite(amount2) || amount2 <= 0) {
+      newErrors.amount2 = 'Confirma un monto mayor a 0';
+    }
+    if (Number.isFinite(amount1) && Number.isFinite(amount2) && amount1 !== amount2) {
+      newErrors.amount2 = 'Los montos no coinciden';
     }
 
     setErrors(newErrors);
@@ -300,9 +322,11 @@ const TransactionForm: React.FC = () => {
                   name="amount1"
                   required
                   className={`input-field pl-10 ${errors.amount1 ? 'border-red-500' : ''}`}
-                  placeholder="Ej: 1000 para $10.00"
-                  value={getDisplayValue(formData.amount1)}
+                  placeholder="Ej: 10.00"
+                  value={formData.amount1}
                   onChange={handleChange}
+                  onBlur={() => handleAmountBlur('amount1')}
+                  inputMode="decimal"
                 />
               </div>
               {errors.amount1 && (
@@ -324,8 +348,10 @@ const TransactionForm: React.FC = () => {
                   required
                   className={`input-field pl-10 ${errors.amount2 ? 'border-red-500' : ''}`}
                   placeholder="Repite el monto"
-                  value={getDisplayValue(formData.amount2)}
+                  value={formData.amount2}
                   onChange={handleChange}
+                  onBlur={() => handleAmountBlur('amount2')}
+                  inputMode="decimal"
                 />
               </div>
               {errors.amount2 && (
@@ -339,10 +365,10 @@ const TransactionForm: React.FC = () => {
         <div className="bg-[#f0fdfd] border border-[#3bbcc8] rounded-lg p-4">
           <h4 className="text-sm font-medium text-[#0d9488] mb-2">💡 Información del Sistema</h4>
           <ul className="text-sm text-[#0d9488] space-y-1">
-            <li>• El monto se formatea automáticamente en el campo</li>
-            <li>• Para abonar $10.00, introduce: 1000</li>
-            <li>• Para abonar $1.50, introduce: 150</li>
-            <li>• Para abonar $0.50, introduce: 50</li>
+            <li>• El monto acepta hasta 2 decimales</li>
+            <li>• Para abonar $10.00, introduce: 10.00</li>
+            <li>• Para abonar $1.50, introduce: 1.50</li>
+            <li>• Para abonar $0.50, introduce: 0.50</li>
           </ul>
         </div>
 
